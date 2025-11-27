@@ -55,7 +55,7 @@ http.interceptors.response.use(//接收时的拦截器
 
 export const getAllText = async (): Promise<Text[]> => { return await http.post('article/getAllText/') };
 
-export const setPinText = async (id: number): Promise<response<Text[]>> => {
+export const setPinTextHttp = async (id: number): Promise<response<Text[]>> => {
     return await http.post('article/setQuickAccess/', null, {
         params: {
             id: id
@@ -63,7 +63,7 @@ export const setPinText = async (id: number): Promise<response<Text[]>> => {
     })
 }
 
-export const setUnPinText = async (id: number): Promise<response<Text[]>> => {
+export const setUnPinTextHttp = async (id: number): Promise<response<Text[]>> => {
     return await http.post('article/removeQuickAccess/', null, {
         params: {
             id: id

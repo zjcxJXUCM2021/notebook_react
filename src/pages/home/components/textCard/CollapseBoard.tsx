@@ -1,0 +1,71 @@
+import styles from './CollapseBoard.module.less'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router';
+import { CloseOutlined, PushpinOutlined, LoadingOutlined } from '@ant-design/icons';
+import { useQueryClient } from '@tanstack/react-query';
+import useUserStore from '../../../../store/user';
+
+interface props {
+    texts: Text[],
+    tags: string,
+    setPinText: (id: number) => Promise<void>,
+    setCancelPinText: (id: number) => Promise<void>
+};
+export default function CollapseBoard(props: props) {
+    const singleItem = props;
+    const nav = useNavigate();
+    const queryClient = useQueryClient(); // 获取那个“缓存池”管理者
+    const jump = (id: number) => {
+        nav(`/text/${id}`)
+    }
+    const [isPinLoading, setIsPinLoading] = useState<Boolean>(false);
+    const [isCancelPinLoading, setIsCancelPinLoading] = useState<Boolean>(false);
+    const userStore = useUserStore();
+
+
+    let [openState, setopenState] = useState(false);
+    const open = () => {
+        setopenState(!openState);
+    }
+    useEffect(() => {
+        singleItem.texts.sort((a, b) => { return b.id - a.id })
+    }, [singleItem.texts])
+
+
+    const setPin = async (e: React.MouseEvent, id: number) => {
+        e.stopPropagation(); // 阻止事件冒泡到父级 div
+        setIsPinLoading(true);
+        await props.setPinText(id);
+        setIsPinLoading(false);
+        console.log(props.texts, "这里");
+    }
+    const setCancelPin = async (e: React.MouseEvent, id: number) => {
+        e.stopPropagation(); // 阻止事件冒泡到父级 div
+        setIsCancelPinLoading(true);
+        await props.setCancelPinText(id);
+        setIsCancelPinLoading(false);
+    }
+    return <>
+        <div className='chapter'>
+            <div className={styles.chapterTitle} onClick={() => { open() }}>{singleItem.tags}</div>
+            <div>
+
+            </div>
+            {(props.texts || []).map((item) => {
+                return <div className={`${styles.mainContent} `} key={item.id} onClick={() => { jump(item.id) }}>
+                    <div className={`${styles.textTitle} ${openState ? styles.mainContentOpen : ''}`}>
+                        <div className={styles.mainTitle}>
+                            <div>{item.title}
+                            </div>
+                            {userStore.accessToken ? <span>
+                                {item.state ? '' : (isPinLoading ? <div className={styles.setPin}><LoadingOutlined /></div> : <PushpinOutlined onClick={(e) => setPin(e, item.id)} className={styles.setPin} />)}
+                                {item.state == '快速访问' ? (isCancelPinLoading ? <div className={styles.setPin}><LoadingOutlined /></div> : <CloseOutlined onClick={(e) => setCancelPin(e, item.id)} className={styles.setCancelPin} />) : ''}
+                            </span> : ''}
+                        </div>
+                    </div>
+                </div>
+            })}
+        </div>
+
+    </>
+}
