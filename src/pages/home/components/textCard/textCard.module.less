@@ -1,0 +1,96 @@
+.chapter {
+    --darkColor: white;
+    --fontColor: #191919;
+    --fontColorInverse: white;
+    --allBackground: #EEEDEE;
+    --overLay: #F5F7FA;
+
+}
+
+
+
+[data-theme='dark'] {
+    --darkColor: #1E1E1E;
+    --fontColor: #E0E0D4;
+    ---fontColorInverse: #191919;
+    --allBackground: #121212; //背景黑色
+    --overLay: #525252;
+}
+
+.fontColor {
+    color: var(--fontColor);
+    user-select: none;
+}
+
+
+.chapterTitle {
+    width: 100%;
+    cursor: pointer;
+    color: var(--fontColor);
+    user-select: none;
+    font-size: 2rem;
+    font-weight: 500;
+    padding: 1% 0px;
+}
+
+.chapterTitle:hover {
+    color: #409EFF;
+}
+
+.textTitle {
+    height: 0rem;
+    font-size: 0px;
+    width: 100%;
+    background-color: var(--darkColor);
+    cursor: pointer;
+    .fontColor;
+
+    .setPin {
+        display: none;
+    }
+
+}
+
+.textTitle:hover {
+    background-color: var(--overLay);
+    color: #409EFF;
+
+    .setPin {
+        display: inline-block;
+    }
+
+    .setCancelPin {
+        display: inline-block;
+    }
+}
+
+.mainContent {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.mainContentOpen {
+    font-size: 1.5rem;
+    height: 3rem;
+    line-height: 3rem;
+    background-color: var(--darkColor);
+    display: block;
+    transition: height 0.2s linear;
+    transition: font-size 0.1s cubic-bezier(.29, .08, 0, .98);
+    padding: 0 20px;
+    .fontColor;
+}
+
+.mainTitle {
+    display: flex;
+    justify-content: space-between;
+}
+
+.setPin:hover {
+    color: red;
+}
+
+
+.setCancelPin:hover {
+    color: red;
+}

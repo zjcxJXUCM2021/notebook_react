@@ -1,0 +1,23 @@
+.innerWrapper {
+    --overlayColor: #374151;
+    --fontColorBtn: #505050;
+    width: 100%;
+    line-height: 1.2rem;
+    font-size: 1.2rem;
+    padding: 5% 5%;
+    color: var(--fontColorBtn);
+
+    transition: color, background-color 0.2s linear;
+
+    [data-theme='dark'] & {
+        --overlayColor: rgb(82, 82, 82);
+        --fontColorBtn: white
+    }
+
+    cursor: pointer;
+}
+
+.innerWrapper:hover {
+    color: whitesmoke;
+    background-color: var(--overlayColor);
+}

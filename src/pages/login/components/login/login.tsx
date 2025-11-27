@@ -1,0 +1,91 @@
+import { Form, Checkbox, Input, Button } from "antd"
+import commonStyles from '@/css/commonStyles/commonStyles.module.less'
+import type { FormProps } from 'antd';
+import { loginRequest } from "../../../../api/http/api";
+import { useNavigate } from "react-router";
+import useUserStore from "../../../../store/user";
+type FieldType = {
+    email?: string;
+    password?: string;
+    remember?: string;
+};
+export default function Login() {
+    const nav = useNavigate();
+    const [form] = Form.useForm();
+    const store = useUserStore();
+    const validateEmail = (_: any, value: string) => {
+        const emailRegex = /^[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!value) {
+
+            return Promise.reject(new Error("请输入邮箱"))
+        }
+        else if (!emailRegex.test(value)) {
+
+            return Promise.reject(new Error('请输入正确的邮箱地址'))
+        }
+        else {
+
+            return Promise.resolve()
+        };
+    }
+    const onFinish: FormProps<FieldType>['onFinish'] = async () => {//values是填入的值
+        try {
+            const res = await loginRequest(form.getFieldValue('email'), form.getFieldValue('password'));
+            console.log(res);
+            if (form.getFieldValue('remember')) {
+                store.setAccessToken(res.accessToken);
+            }
+            nav('/');
+        } catch {
+            //全局抛出message显示
+        }
+
+    };
+    const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+        console.log('Failed:', errorInfo);
+    };
+    return <>
+        <div className={commonStyles.center}>
+            <Form
+                form={form}
+                name="log"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 24 }}
+                style={{}}
+                initialValues={{ remember: true }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+            >
+                <Form.Item<FieldType>
+                    label="邮箱:"
+                    name="email"
+                    rules={[{ required: true, validator: validateEmail }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item<FieldType>
+                    label="密码:"
+                    name="password"
+                    rules={[{ required: true, message: '请输入密码' }]}
+                >
+                    <Input.Password />
+                </Form.Item>
+                <Form.Item<FieldType>
+                    name="remember"
+                    valuePropName="checked"
+                    wrapperCol={{ offset: 8, span: 16 }}
+                >
+                    <Checkbox>记住我</Checkbox>
+                </Form.Item>
+
+                <Form.Item label={null} >
+                    <Button type="primary" htmlType="submit">
+                        登录
+                    </Button>
+                </Form.Item>
+            </Form>
+        </div>
+
+    </>
+}
