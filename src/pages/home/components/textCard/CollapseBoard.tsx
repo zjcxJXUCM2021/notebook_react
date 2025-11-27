@@ -37,7 +37,6 @@ export default function CollapseBoard(props: props) {
         setIsPinLoading(true);
         await props.setPinText(id);
         setIsPinLoading(false);
-        console.log(props.texts, "这里");
     }
     const setCancelPin = async (e: React.MouseEvent, id: number) => {
         e.stopPropagation(); // 阻止事件冒泡到父级 div

@@ -23,9 +23,12 @@ export default function Left() {
         if (!keyword.trim()) return Promise.reject(new Error('请输入文字'));
         else return Promise.resolve();
     }
-    const onFinish = async (value: formType) => {
-        console.log(value);
+    const onFinish = async () => {
         nav('/search/' + form.getFieldValue('keyword'));
+    }
+    const logout = () => {
+        localStorage.clear();
+        UserStore.setAccessToken('');
     }
     return <>
         <div className={styles.wrapper}>
@@ -59,7 +62,7 @@ export default function Left() {
             <div className={styles.downWrapper} >
                 {
                     UserStore.accessToken ? <><ButtonList path='/upload/' >上传</ButtonList>
-                        <div onClick={() => { localStorage.clear() }} style={{ width: "100%" }}>
+                        <div onClick={() => { logout() }} style={{ width: "100%" }}>
                             <ButtonList >注销</ButtonList>
                         </div> </> : <ButtonList path='/login/' >登录</ButtonList>
                 }
@@ -80,8 +83,6 @@ export default function Left() {
                 >
                         <Input placeholder='文章标题' />
                     </Form.Item></Form>
-
-
             </div>
 
         </div >

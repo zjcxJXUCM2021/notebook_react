@@ -13,7 +13,6 @@ interface keyArr {
 
 export default function MainLayout() {
     const [texts, setTexts] = useState<Text[]>([]);
-    // const [keyList, setKeyList] = useState<keyArr>({});
     const queryClient = useQueryClient(); // 获取那个“缓存池”管理者
     useEffect(() => {
         const init = async () => {
