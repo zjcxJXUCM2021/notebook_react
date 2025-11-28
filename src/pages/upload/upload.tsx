@@ -1,24 +1,72 @@
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './upload.module.less'
 import { Editor } from '@tinymce/tinymce-react'
-import { Form, Button, Input } from 'antd';
-import { uploadText } from '../../api/http/api';
+import { Form, Button, Input, ConfigProvider, theme, Modal } from 'antd';
+import { getText, uploadText } from '../../api/http/api';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import { useBlocker, useNavigate, useSearchParams } from 'react-router';
+import useDarkStore from '../../store/darkMode';
+import EasyModel from '../../components/model/easyModel';
+
 
 interface FieldType {
     title: string,
     tag: string,
 }
 export default function Upload() {
+
     const editorRef = useRef<any>(null);
     const [form] = Form.useForm();
     const nav = useNavigate();
+    const [param] = useSearchParams();
+    const [title, setTitle] = useState('');
+    const [tag, setTag] = useState('');
+    const [content, setContent] = useState('');
 
+
+    const blocker = useBlocker(
+        ({ currentLocation, nextLocation }) => {
+            if (nextLocation.pathname == '/') return false;
+            else if (currentLocation.pathname !== nextLocation.pathname) {
+                showModal();
+                return true;
+            }
+            else return false;
+        }
+
+    );
+    useEffect(() => {
+        const id = param.get('id');
+        const init = async () => {
+            try {
+                const res = await getText(Number(id));
+                // setTitle(res.title);
+                // setTag(res.tag);
+                setContent(res.content);
+                form.setFieldsValue({
+                    title: res.title,
+                    tag: res.tag
+                });
+            } catch {
+            }
+        }
+        init();
+    }, [])
+    useEffect(() => {
+        const handler = (e: any) => {
+            e.preventDefault();
+            e.returnValue = ""; // 必须有，Chrome 要求这样才能拦截
+        };
+
+        window.addEventListener("beforeunload", handler);
+
+        return () => {
+            window.removeEventListener("beforeunload", handler);
+        };
+    }, []);
 
     const onFinish = async (value: FieldType) => {
-        console.log(value);
         if (!editorRef.current) {
             return;
         }
@@ -30,10 +78,10 @@ export default function Upload() {
                 content: currentContent,
                 title: value.title,
                 tag: value.tag,
-            } as Text)
+            } as Text);
             nav('/');
         } catch {
-            console.log("失败")
+            console.log("失败");
         }
 
     }
@@ -81,6 +129,44 @@ export default function Upload() {
             });
         });
     };
+
+    const themeConfig = () => {
+        if (useDarkStore().isDark)
+            return {
+                "components": {
+                    "Form": {
+                        "labelColor": "rgba(255,255,255,0.88)",
+                        "algorithm": theme.darkAlgorithm,
+                    },
+                    "Input": {
+                        "algorithm": theme.darkAlgorithm,
+                        "colorBgContainer": "#141414",
+                        "colorText": "rgba(255,255,255,0.85)",
+                        "colorBorder": "rgb(29,29,29)"
+                    }
+
+                },
+            }
+        else
+            return {};
+
+    };
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleOk = () => {
+        blocker.proceed?.()
+        setIsModalOpen(false);
+    };
+
+    const handleCancel = () => {
+        blocker.reset?.()
+        setIsModalOpen(false);
+    };
     return <>
         <div className={styles.wrapper}>
             <Form
@@ -96,20 +182,27 @@ export default function Upload() {
                 layout='vertical'
             >
                 <div className={styles.inputWrapper}>
-                    <Form.Item<FieldType>
-                        label="章节:"
-                        name="title"
-                        rules={[{ required: true, }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item<FieldType>
-                        label="标题:"
-                        name="tag"
-                        rules={[{ required: true, message: '请输入密码' }]}
-                    >
-                        <Input.Password />
-                    </Form.Item>
+                    <ConfigProvider
+                        theme={themeConfig()}>
+                        <Form.Item<FieldType>
+                            label="章节:"
+                            name="tag"
+                            rules={[{ required: true, message: '请输入密码' }]}
+                        // initialValue={title} 只有第一次才能设置初始值，即组件挂载时
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item<FieldType>
+                            label="标题:"
+                            name="title"
+                            rules={[{ required: true, }]}
+                        // initialValue={tag}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </ConfigProvider>
+
+
                 </div>
                 <Form.Item>
                     <div className={styles.editorWrapper}>
@@ -117,7 +210,7 @@ export default function Upload() {
                             tinymceScriptSrc='/tinymce/tinymce.min.js'
                             licenseKey='gpl'
                             onInit={(_evt, editor) => editorRef.current = editor}
-                            initialValue={""}
+                            initialValue={content}
                             init={{
                                 height: '600px',
                                 menubar: false,
@@ -147,11 +240,26 @@ export default function Upload() {
                         </Button>
                     </div>
                 </Form.Item>
-            </Form>
+            </Form >
+        </div >
 
-
-        </div>
-
+        <Modal
+            title="提示"
+            closable={{ 'aria-label': 'Custom Close Button' }}
+            open={isModalOpen}
+            onOk={handleOk}
+            onCancel={handleCancel}
+            footer={(_, { OkBtn, CancelBtn }) => (
+                <>
+                    <OkBtn />
+                    <CancelBtn />
+                </>
+            )}
+        >
+            <div>
+                还没有保存文档，确定返回吗？
+            </div>
+        </Modal>
 
 
 
