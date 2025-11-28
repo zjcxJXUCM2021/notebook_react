@@ -31,9 +31,9 @@ export default function Login() {
     const onFinish: FormProps<FieldType>['onFinish'] = async () => {//values是填入的值
         try {
             const res = await loginRequest(form.getFieldValue('email'), form.getFieldValue('password'));
-            console.log(res);
             if (form.getFieldValue('remember')) {
                 store.setAccessToken(res.accessToken);
+                if (form.getFieldValue('email') == '2631854038@qq.com') localStorage.setItem('email', '2631854038@qq.com');
             }
             nav('/');
         } catch {

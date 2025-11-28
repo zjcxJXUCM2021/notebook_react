@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface userStore {
     accessToken: string,//refreshToken在cookie中
-    setAccessToken: (newToken: string) => void
+    setAccessToken: (newToken: string) => void,
 }
 
 const useUserStore = create<userStore>((set) => {

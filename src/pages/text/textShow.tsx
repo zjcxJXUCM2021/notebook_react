@@ -1,15 +1,17 @@
 import { useNavigate, useParams } from 'react-router';
 import { getText } from '../../api/http/api'
-import Basement from '../../components/basement/basement'
 import styles from './textShow.module.less'
 import { useEffect, useState } from 'react';
 import { Button, message } from 'antd';
+import useTextFontSize from '../../store/state/textFontSize';
 
 export default function TextShow() {
     const nav = useNavigate();
     const { id } = useParams();
     const [text, setText] = useState<Text>();
     const [messageApi, contextHolder] = message.useMessage();
+    const [textFontSize, setTextFontSize] = useState(1);
+    const textFontSizeStore = useTextFontSize();
     useEffect(() => {
         const init = async () => {
             if (!id) {
@@ -32,6 +34,9 @@ export default function TextShow() {
         }
         init();
     }, [])
+    useEffect(() => {
+        setTextFontSize(Number(textFontSizeStore.fontSize));
+    }, [textFontSizeStore.fontSize])
     const jump = () => {
         nav(`/upload/?id=${id}`);
     }
@@ -51,6 +56,6 @@ export default function TextShow() {
                 <Button onClick={() => jump()}>修改</Button>
             </div>
         </div>
-        <div dangerouslySetInnerHTML={{ __html: text?.content || '加载中' }} />
+        <div dangerouslySetInnerHTML={{ __html: text?.content || '加载中' }} style={{ fontSize: `${textFontSize}rem` }} />
     </>
 }

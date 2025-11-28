@@ -1,20 +1,34 @@
 import styles from './left.module.less'
-import { Input, Avatar, Tooltip, Button, Divider, Form } from 'antd'
+import { Input, Avatar, Tooltip, Button, Divider, Form, Slider } from 'antd'
 import { MailOutlined, MoonOutlined } from '@ant-design/icons'
 import Icon from '../../icon/Icon'
 import useDarkStore from '../../../store/darkMode'
 import ButtonList from '../../buttonList/buttonList'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import useUserStore from '../../../store/user'
+import { useEffect, useState } from 'react'
+import useTextFontSize from '../../../store/state/textFontSize'
 
 interface formType {
     keyword: string,
 }
-export default function Left() {
+interface leftProp {
+    text: Text[]
+}
+export default function Left(prop: leftProp) {
     const UserStore = useUserStore();
+
+    const location = useLocation();
+    const [textFontSize, setTextFontSize] = useState(13);
+    const textFontSizeStore = useTextFontSize();
     const nav = useNavigate();
     const [form] = Form.useForm();
     let darkStore = useDarkStore();
+
+    useEffect(() => {
+        console.log(textFontSize);
+        textFontSizeStore.setFontSize(String(textFontSize));
+    }, [textFontSize])
     const toDark = () => {
         darkStore.updateDark();
     }
@@ -30,6 +44,10 @@ export default function Left() {
         localStorage.clear();
         UserStore.setAccessToken('');
     }
+    const set = new Set;
+    prop.text.forEach((item) => {
+        set.add(item.tag);
+    })
     return <>
         <div className={styles.wrapper}>
             <div className={styles.upWrapper}>
@@ -41,7 +59,7 @@ export default function Left() {
                     JLY Blog
                 </div>
                 <div className={styles.sum}>
-                    41篇文章<Divider type="vertical" />32个专题
+                    {prop.text.length}篇文档<Divider type="vertical" />{set.size}个专题
                 </div>
                 <div className={styles.btn}>
                     <Tooltip title="2631854038@qq.com">
@@ -61,12 +79,12 @@ export default function Left() {
             </div>
             <div className={styles.downWrapper} >
                 {
-                    UserStore.accessToken ? <><ButtonList path='/upload/' >上传</ButtonList>
-                        <div onClick={() => { logout() }} style={{ width: "100%" }}>
+                    UserStore.accessToken ? <>{localStorage.getItem("email") ? <><ButtonList path='/upload/' >上传</ButtonList></>
+                        : ''}<div onClick={() => { logout() }} style={{ width: "100%" }}>
                             <ButtonList >注销</ButtonList>
                         </div> </> : <ButtonList path='/login/' >登录</ButtonList>
                 }
-                <ButtonList path='/about/' >关于</ButtonList>
+                <ButtonList path='/' >首页</ButtonList>
                 <ButtonList path='/' >回到顶部</ButtonList>
                 <Form
                     form={form}
@@ -83,6 +101,12 @@ export default function Left() {
                 >
                         <Input placeholder='文章标题' />
                     </Form.Item></Form>
+                {
+                    location.pathname.slice(0, 5) == '/text' ? <div style={{ width: '100%' }}>
+                        字体大小
+                        <Slider value={textFontSize} onChange={(value) => setTextFontSize(value)} max={3} min={0.5} step={0.1} />
+                    </div> : ''
+                }
             </div>
 
         </div >

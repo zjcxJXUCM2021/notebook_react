@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './upload.module.less'
 import { Editor } from '@tinymce/tinymce-react'
 import { Form, Button, Input, ConfigProvider, theme, Modal } from 'antd';
-import { getText, uploadText } from '../../api/http/api';
+import { getText, updateText, uploadText } from '../../api/http/api';
 import axios from 'axios';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router';
 import useDarkStore from '../../store/darkMode';
@@ -23,12 +23,12 @@ export default function Upload() {
     const [title, setTitle] = useState('');
     const [tag, setTag] = useState('');
     const [content, setContent] = useState('');
-
+    const id = param.get('id');
 
     const blocker = useBlocker(
         ({ currentLocation, nextLocation }) => {
             if (nextLocation.pathname == '/') return false;
-            else if (currentLocation.pathname !== nextLocation.pathname) {
+            else if (currentLocation.pathname !== nextLocation.pathname && content) {
                 showModal();
                 return true;
             }
@@ -37,12 +37,10 @@ export default function Upload() {
 
     );
     useEffect(() => {
-        const id = param.get('id');
+
         const init = async () => {
             try {
                 const res = await getText(Number(id));
-                // setTitle(res.title);
-                // setTag(res.tag);
                 setContent(res.content);
                 form.setFieldsValue({
                     title: res.title,
@@ -71,14 +69,22 @@ export default function Upload() {
             return;
         }
         const currentContent = editorRef.current.getContent();
-
         try {
-            const res = await uploadText({
-                id: 0,
-                content: currentContent,
-                title: value.title,
-                tag: value.tag,
-            } as Text);
+            if (!id) {
+                await uploadText({
+                    id: 0,
+                    content: currentContent,
+                    title: value.title,
+                    tag: value.tag,
+                } as Text);
+            } else {
+                await updateText({
+                    id: Number(id),
+                    content: currentContent,
+                    title: value.title,
+                    tag: value.tag,
+                } as Text)
+            }
             nav('/');
         } catch {
             console.log("失败");

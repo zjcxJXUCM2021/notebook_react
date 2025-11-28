@@ -71,7 +71,7 @@ export default function MainLayout() {
 
     return <>
         <div className={styles.base}>
-            <Left></Left>
+            <Left text={texts}></Left>
             <Basement>
                 <Outlet context={{ keyList, setPinText, setCancelPinText, }}>
 

@@ -28,12 +28,11 @@ http.interceptors.request.use(config => {//发送时的拦截器
 http.interceptors.response.use(//接收时的拦截器
     response => {//网络上没错
         if (response.data.code < 300) {
-            console.log(response.data.data);
+            console.log(response.data);
             return response.data.data;
         }
         else if (response.data.code == 401) {//当accesstoken过期时
             message.error('未登录');
-            console.log("未登录");
 
             const renewToken = async () => {
                 const res = await renewTokenRequest(useUserStore.getState().accessToken);
@@ -46,8 +45,6 @@ http.interceptors.response.use(//接收时的拦截器
             return Promise.reject(response.data.message);
         }
     }, errorHandle => {
-        console.log(errorHandle);
-        console.error("超时");
         message.error('网络异常');
         return Promise.reject("error");
     }
@@ -103,6 +100,17 @@ export const uploadText = async (Text: Text): Promise<string> => {
     return await http.post('/article/addNew/', new URLSearchParams({
         article: JSON.stringify({
             id: '',
+            content: Text.content,
+            title: Text.title,
+            tag: Text.tag,
+        }),
+    }))
+}
+
+export const updateText = async (Text: Text): Promise<string> => {
+    return await http.post('/article/updata/', new URLSearchParams({
+        article: JSON.stringify({
+            id: Text.id,
             content: Text.content,
             title: Text.title,
             tag: Text.tag,
