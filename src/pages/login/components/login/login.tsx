@@ -5,14 +5,14 @@ import { loginRequest } from "../../../../api/http/api";
 import { useNavigate } from "react-router";
 import useUserStore from "../../../../store/user";
 type FieldType = {
-    email?: string;
-    password?: string;
-    remember?: string;
+    email: string;
+    password: string;
+    remember: boolean;
 };
 export default function Login() {
     const nav = useNavigate();
     const [form] = Form.useForm();
-    const store = useUserStore();
+    const UserStore = useUserStore();
     const validateEmail = (_: any, value: string) => {
         const emailRegex = /^[\w.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!value) {
@@ -28,13 +28,17 @@ export default function Login() {
             return Promise.resolve()
         };
     }
-    const onFinish: FormProps<FieldType>['onFinish'] = async () => {//values是填入的值
+    const onFinish: FormProps<FieldType>['onFinish'] = async (value) => {//values是填入的值
         try {
-            const res = await loginRequest(form.getFieldValue('email'), form.getFieldValue('password'));
+            console.log("是否记住我", value.remember);
+            const res = await loginRequest({ email: value.email, password: value.password, remember: value.remember });
             if (form.getFieldValue('remember')) {
-                store.setAccessToken(res.accessToken);
-                if (form.getFieldValue('email') == '2631854038@qq.com') localStorage.setItem('email', '2631854038@qq.com');
+                UserStore.setAccessToken(res.accessToken);
+                localStorage.setItem("accessToken", res.accessToken);
             }
+            else
+                UserStore.setAccessToken(res.accessToken);
+            if (form.getFieldValue('email') == '2631854038@qq.com') localStorage.setItem('email', '2631854038@qq.com');
             nav('/');
         } catch {
             //全局抛出message显示

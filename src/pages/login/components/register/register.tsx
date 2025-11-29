@@ -3,19 +3,22 @@ import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
 import axios from "axios";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { loginRequest, registerAdmin } from "../../../../api/http/api";
 type FieldType = {
-    username?: string;
-    password?: string;
-    confirmPassword?: string;
-    phone?: string;
-    email?: string;
-    code?: string;
+    username: string;
+    password: string;
+    confirmPassword: string;
+    phone: string;
+    email: string;
+    code: string;
     remember?: string;
 };
 
 
 export default function Register() {
     const [form] = Form.useForm();
+    const nav = useNavigate();
     let [countdown, setcountdown] = useState(60);
     let [emailState, setemailState] = useState(true);
     let timeRef = useRef(0);
@@ -43,16 +46,19 @@ export default function Register() {
         }, 1000)
     }
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {//values是填入的值，当表单前端验证通过时
-        console.log('Success:', values);
-        let res = await axios.post(import.meta.env.VITE_BASE_URL + 'admin/register/', null, {
-            params: {
+        try {
+            await registerAdmin({
                 name: form.getFieldValue("username"),
                 password: form.getFieldValue("password"),
                 email: form.getFieldValue("email"),
                 code: form.getFieldValue("code"),
-            }
-        });
-        console.log(res);
+            });
+            await loginRequest({ email: values.email, password: values.password, remember: false });
+            nav('/');
+
+        } catch (e) {
+            console.log(e);
+        }
     };
     let onFinishFailed = () => {
 

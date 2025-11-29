@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from 'react-router'
 import useUserStore from '../../../store/user'
 import { useEffect, useState } from 'react'
 import useTextFontSize from '../../../store/state/textFontSize'
+import { logoutAdmin } from '../../../api/http/api'
 
 interface formType {
     keyword: string,
@@ -26,7 +27,6 @@ export default function Left(prop: leftProp) {
     let darkStore = useDarkStore();
 
     useEffect(() => {
-        console.log(textFontSize);
         textFontSizeStore.setFontSize(String(textFontSize));
     }, [textFontSize])
     const toDark = () => {
@@ -40,14 +40,29 @@ export default function Left(prop: leftProp) {
     const onFinish = async () => {
         nav('/search/' + form.getFieldValue('keyword'));
     }
-    const logout = () => {
-        localStorage.clear();
-        UserStore.setAccessToken('');
+    const logout = async () => {
+        console.log("注销")
+        try {
+            await logoutAdmin();
+            // localStorage.removeItem('email');
+            localStorage.clear();
+            UserStore.setAccessToken('');
+        } catch (e) {
+
+        }
+
     }
     const set = new Set;
     prop.text.forEach((item) => {
         set.add(item.tag);
     })
+    useEffect(() => {
+        const token = UserStore.accessToken;
+        console.log("Token值:", token);
+        console.log("Token类型:", typeof token);
+        console.log("Token长度:", token?.length);
+        console.log("是否为真值:", Boolean(token)); // 这一步如果是 true，那就是原因
+    }, [UserStore.accessToken]);
     return <>
         <div className={styles.wrapper}>
             <div className={styles.upWrapper}>
@@ -79,10 +94,12 @@ export default function Left(prop: leftProp) {
             </div>
             <div className={styles.downWrapper} >
                 {
-                    UserStore.accessToken ? <>{localStorage.getItem("email") ? <><ButtonList path='/upload/' >上传</ButtonList></>
-                        : ''}<div onClick={() => { logout() }} style={{ width: "100%" }}>
-                            <ButtonList >注销</ButtonList>
-                        </div> </> : <ButtonList path='/login/' >登录</ButtonList>
+                    UserStore.accessToken ?
+                        <>{localStorage.getItem("email") ? <><ButtonList path='/upload/' >上传</ButtonList></> : ''}
+                            <div onClick={() => { logout() }} style={{ width: "100%" }}>
+                                <ButtonList >注销</ButtonList>
+                            </div> </>
+                        : <ButtonList path='/login/' >登录</ButtonList>
                 }
                 <ButtonList path='/' >首页</ButtonList>
                 <ButtonList path='/' >回到顶部</ButtonList>

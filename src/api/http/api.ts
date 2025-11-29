@@ -28,17 +28,16 @@ http.interceptors.request.use(config => {//发送时的拦截器
 http.interceptors.response.use(//接收时的拦截器
     response => {//网络上没错
         if (response.data.code < 300) {
-            console.log(response.data);
             return response.data.data;
         }
         else if (response.data.code == 401) {//当accesstoken过期时
             message.error('未登录');
-
-            const renewToken = async () => {
-                const res = await renewTokenRequest(useUserStore.getState().accessToken);
-                useUserStore.getState().setAccessToken(res);
-            }
-            renewToken();
+            console.log("续期TOken");
+            // const renewToken = async () => {
+            //     const res = await renewTokenRequest(useUserStore.getState().accessToken);
+            //     useUserStore.getState().setAccessToken(res);
+            // }
+            // renewToken();
             return Promise.reject(response.data.message);
         } else {
             message.error('网络异常');
@@ -79,13 +78,27 @@ export const getText = async (id: number): Promise<Text> => {
     })
 }
 
-export const loginRequest = async (email: string, password: string): Promise<loginRes> => {
+export const loginRequest = async (params: { email: string, password: string, remember: boolean }): Promise<loginRes> => {
     return await http.post('/admin/login/', null, {
         params: {
-            email: email,
-            password: password,
+            email: params.email,
+            password: params.password,
+            remember: params.remember
         }
     })
+}
+export const registerAdmin = async (params: { name: string, password: string, email: string, code: string }): Promise<string> => {
+    return await http.post('/admin/register/', null, {
+        params: {
+            name: params.name,
+            password: params.password,
+            email: params.email,
+            code: params.code,
+        }
+    })
+}
+export const logoutAdmin = async (): Promise<void> => {
+    return await http.post('/token/logoutToken/');
 }
 
 const renewTokenRequest = async (AccessToken: string): Promise<string> => {

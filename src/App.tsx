@@ -21,6 +21,7 @@ function App() {
   useEffect(() => {//取出token,不用和后端进行检验，如果发http是401就更新
     const temp = localStorage.getItem("accessToken");
     if (temp) {
+      console.log("这里");
       UserStore.setAccessToken(temp);
     }
   }, [])
