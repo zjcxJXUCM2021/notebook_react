@@ -1,4 +1,4 @@
-import { Form, Checkbox, Input, Button } from "antd"
+import { Form, Checkbox, Input, Button, App } from "antd"
 import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
 import { loginRequest } from "../../../../api/http/api";
@@ -10,6 +10,7 @@ type FieldType = {
     remember: boolean;
 };
 export default function Login() {
+    const { message } = App.useApp();
     const nav = useNavigate();
     const [form] = Form.useForm();
     const UserStore = useUserStore();
@@ -29,8 +30,9 @@ export default function Login() {
         };
     }
     const onFinish: FormProps<FieldType>['onFinish'] = async (value) => {//values是填入的值
+        const key = '123';
         try {
-            console.log("是否记住我", value.remember);
+            message.loading({ content: '正在加载...', key });
             const res = await loginRequest({ email: value.email, password: value.password, remember: value.remember });
             if (form.getFieldValue('remember')) {
                 UserStore.setAccessToken(res.accessToken);
@@ -39,9 +41,12 @@ export default function Login() {
             else
                 UserStore.setAccessToken(res.accessToken);
             if (form.getFieldValue('email') == '2631854038@qq.com') localStorage.setItem('email', '2631854038@qq.com');
+            message.success({ content: '登录成功', key, duration: 2 });
             nav('/');
-        } catch {
+
+        } catch (e) {
             //全局抛出message显示
+            message.error({ content: `${e}`, key, duration: 2 })
         }
 
     };

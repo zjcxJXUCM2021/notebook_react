@@ -9,6 +9,9 @@ function App() {
   const UserStore = useUserStore();
   let { isDark } = DarkMode;
   useEffect(() => {
+    if (localStorage.getItem("isDark") == 'true') DarkMode.setDark(true);
+    else DarkMode.setDark(false);
+
     if (isDark) {
       // 如果是深色模式，设为 dark
       document.documentElement.setAttribute('data-theme', 'dark');
@@ -18,11 +21,10 @@ function App() {
       // 或者使用: document.documentElement.removeAttribute('data-theme');
     }
   }, [isDark])
-  useEffect(() => {//取出token,不用和后端进行检验，如果发http是401就更新
-    const temp = localStorage.getItem("accessToken");
-    if (temp) {
-      console.log("这里");
-      UserStore.setAccessToken(temp);
+  useEffect(() => {//取出token,设置全局变量,不用和后端进行检验，如果发http是401就更新
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      UserStore.setAccessToken(accessToken);
     }
   }, [])
   return (

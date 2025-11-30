@@ -1,10 +1,10 @@
-import { Form, Input, Button, Space } from "antd"
+import { Form, Input, Button, Space, App } from "antd"
 import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
 import axios from "axios";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { loginRequest, registerAdmin } from "../../../../api/http/api";
+import { loginRequest, registerAdmin, sendCodeAdmin } from "../../../../api/http/api";
 type FieldType = {
     username: string;
     password: string;
@@ -17,6 +17,7 @@ type FieldType = {
 
 
 export default function Register() {
+    const { message } = App.useApp();
     const [form] = Form.useForm();
     const nav = useNavigate();
     let [countdown, setcountdown] = useState(60);
@@ -24,29 +25,28 @@ export default function Register() {
     let timeRef = useRef(0);
     let sendCode = async () => {
         setemailState(true);
-        await axios.post(import.meta.env.VITE_BASE_URL + 'admin/sendEmail/', null, {
-            params: {
-                name: form.getFieldValue("username"),
-                email: form.getFieldValue("email")
-            },
-            headers: {
-
-            }
-        })
-        setcountdown(setcountdown => setcountdown - 1);
-        timeRef.current = setInterval(() => {
-            setcountdown(prev => {
-                if (prev <= 1) {
-                    clearInterval(timeRef.current!);
-                    setemailState(false);
-                    return 60;
-                }
-                return prev - 1;
-            });
-        }, 1000)
+        try {
+            message.loading({ content: "发送验证码中", key: "sendCode" });
+            await sendCodeAdmin({ name: form.getFieldValue("name"), email: form.getFieldValue("email") });
+            setcountdown(setcountdown => setcountdown - 1);
+            timeRef.current = setInterval(() => {
+                setcountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timeRef.current!);
+                        setemailState(false);
+                        return 60;
+                    }
+                    return prev - 1;
+                });
+            }, 1000)
+            message.success({ content: "发送成功", key: 'sendCode', duration: 2 })
+        } catch (e) {
+            message.error({ content: "发送失败", key: 'sendCode', duration: 2 })
+        }
     }
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {//values是填入的值，当表单前端验证通过时
         try {
+            message.loading({ content: "加载中", key: "check" });
             await registerAdmin({
                 name: form.getFieldValue("username"),
                 password: form.getFieldValue("password"),
@@ -54,10 +54,11 @@ export default function Register() {
                 code: form.getFieldValue("code"),
             });
             await loginRequest({ email: values.email, password: values.password, remember: false });
+            message.success({ content: "注册成功", key: "check", duration: 2 });
             nav('/');
 
         } catch (e) {
-            console.log(e);
+            message.error({ content: `${e}`, key: "check", duration: 2 });
         }
     };
     let onFinishFailed = () => {

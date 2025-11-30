@@ -15,13 +15,11 @@ interface FieldType {
     tag: string,
 }
 export default function Upload() {
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const editorRef = useRef<any>(null);
     const [form] = Form.useForm();
     const nav = useNavigate();
     const [param] = useSearchParams();
-    const [title, setTitle] = useState('');
-    const [tag, setTag] = useState('');
     const [content, setContent] = useState('');
     const id = param.get('id');
 
@@ -158,7 +156,7 @@ export default function Upload() {
 
     };
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -180,7 +178,7 @@ export default function Upload() {
                 name="log"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 24 }}
-                style={{}}
+                style={{ width: '70%' }}
                 initialValues={{ remember: true }}
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}

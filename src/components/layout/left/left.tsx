@@ -20,7 +20,7 @@ export default function Left(prop: leftProp) {
     const UserStore = useUserStore();
 
     const location = useLocation();
-    const [textFontSize, setTextFontSize] = useState(13);
+    const [textFontSize, setTextFontSize] = useState(1);
     const textFontSizeStore = useTextFontSize();
     const nav = useNavigate();
     const [form] = Form.useForm();
@@ -41,11 +41,11 @@ export default function Left(prop: leftProp) {
         nav('/search/' + form.getFieldValue('keyword'));
     }
     const logout = async () => {
-        console.log("注销")
         try {
             await logoutAdmin();
-            // localStorage.removeItem('email');
-            localStorage.clear();
+            localStorage.removeItem('email');
+            localStorage.removeItem('accessToken');
+            // localStorage.clear();
             UserStore.setAccessToken('');
         } catch (e) {
 
@@ -56,13 +56,6 @@ export default function Left(prop: leftProp) {
     prop.text.forEach((item) => {
         set.add(item.tag);
     })
-    useEffect(() => {
-        const token = UserStore.accessToken;
-        console.log("Token值:", token);
-        console.log("Token类型:", typeof token);
-        console.log("Token长度:", token?.length);
-        console.log("是否为真值:", Boolean(token)); // 这一步如果是 true，那就是原因
-    }, [UserStore.accessToken]);
     return <>
         <div className={styles.wrapper}>
             <div className={styles.upWrapper}>

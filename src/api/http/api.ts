@@ -27,6 +27,7 @@ http.interceptors.request.use(config => {//发送时的拦截器
 
 http.interceptors.response.use(//接收时的拦截器
     response => {//网络上没错
+        console.log(response.data);
         if (response.data.code < 300) {
             return response.data.data;
         }
@@ -87,6 +88,17 @@ export const loginRequest = async (params: { email: string, password: string, re
         }
     })
 }
+
+export const sendCodeAdmin = async (params: { name: "string", email: "string" }): Promise<string> => {
+    return await http.post('/admin/sendEmail/', null, {
+        params: {
+            name: params.name,
+            email: params.email,
+        }
+    })
+}
+
+
 export const registerAdmin = async (params: { name: string, password: string, email: string, code: string }): Promise<string> => {
     return await http.post('/admin/register/', null, {
         params: {
