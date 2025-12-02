@@ -1,7 +1,6 @@
 import { Form, Input, Button, Space, App } from "antd"
 import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
-import axios from "axios";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { loginRequest, registerAdmin, sendCodeAdmin } from "../../../../api/http/api";
@@ -14,7 +13,6 @@ type FieldType = {
     code: string;
     remember?: string;
 };
-
 
 export default function Register() {
     const { message } = App.useApp();

@@ -1,9 +1,8 @@
 import styles from './mainLayout.module.less'
 import Left from '../../components/layout/left/left'
-import Center from '../../pages/home/components/center/center'
 import Right from '../../components/layout/right/right'
 import { getAllText, setPinTextHttp, setUnPinTextHttp } from '../../api/http/api'
-import { useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router'
 import Basement from '../../components/basement/basement'
 import { useQueryClient } from '@tanstack/react-query'
@@ -11,9 +10,18 @@ interface keyArr {
     [key: string]: Text[]
 };
 
+interface info {
+    texts: Text[],
+    setPinText: (id: number) => Promise<void>,
+    setCancelPinText: (id: number) => Promise<void>
+}
+
+export const InfoContext = createContext<info>({} as info);
+
 export default function MainLayout() {
     const [texts, setTexts] = useState<Text[]>([]);
     const queryClient = useQueryClient(); // 获取那个“缓存池”管理者
+
     useEffect(() => {
         const init = async () => {
             const unorderList = await getAllText();
@@ -23,17 +31,6 @@ export default function MainLayout() {
         init();
     }, []);
 
-    const keyList = useMemo(() => {
-        const temp: keyArr = {};
-        texts.forEach((item) => {
-            if (temp[item.tag]) {
-                temp[item.tag].push(item);
-            } else {
-                temp[item.tag] = [item];
-            }
-        });
-        return temp;
-    }, [texts])
     const setPinText = async (id: number) => {
         try {
             await setPinTextHttp(id);
@@ -69,13 +66,17 @@ export default function MainLayout() {
         }
     }
 
+    const value = useMemo(() => ({ texts, setPinText, setCancelPinText }), [texts]);
+
     return <>
         <div className={styles.base}>
             <Left text={texts}></Left>
             <Basement>
-                <Outlet context={{ keyList, setPinText, setCancelPinText, }}>
 
-                </Outlet>
+                <InfoContext.Provider value={value}>
+                    <Outlet ></Outlet>
+                </InfoContext.Provider>
+
             </Basement>
             <Right text={texts}>
 

@@ -2,8 +2,7 @@ import styles from './CollapseBoard.module.less'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { CloseOutlined, PushpinOutlined, LoadingOutlined } from '@ant-design/icons';
-import { useQueryClient } from '@tanstack/react-query';
-import useUserStore from '../../../../store/user';
+import useUserStore from '../../store/user';
 
 interface props {
     texts: Text[],
@@ -13,8 +12,7 @@ interface props {
 };
 export default function CollapseBoard(props: props) {
     const singleItem = props;
-    const nav = useNavigate();
-    const queryClient = useQueryClient(); // 获取那个“缓存池”管理者
+    const nav = useNavigate();// 获取那个“缓存池”管理者
     const jump = (id: number) => {
         nav(`/text/${id}`)
     }

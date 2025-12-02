@@ -78,6 +78,15 @@ export const getText = async (id: number): Promise<Text> => {
         }
     })
 }
+export const searchTextByKeyword = async (keyword: string): Promise<Text[]> => {
+    return await http.post('/articleGet/searchArticle/', null, {
+        params: {
+            keyword: keyword,
+            page: 1,
+            sizes: 10
+        }
+    })
+}
 
 export const loginRequest = async (params: { email: string, password: string, remember: boolean }): Promise<loginRes> => {
     return await http.post('/admin/login/', null, {
@@ -97,7 +106,6 @@ export const sendCodeAdmin = async (params: { name: "string", email: "string" })
         }
     })
 }
-
 
 export const registerAdmin = async (params: { name: string, password: string, email: string, code: string }): Promise<string> => {
     return await http.post('/admin/register/', null, {

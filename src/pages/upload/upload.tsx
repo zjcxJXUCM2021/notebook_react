@@ -54,9 +54,7 @@ export default function Upload() {
             e.preventDefault();
             e.returnValue = ""; // 必须有，Chrome 要求这样才能拦截
         };
-
         window.addEventListener("beforeunload", handler);
-
         return () => {
             window.removeEventListener("beforeunload", handler);
         };

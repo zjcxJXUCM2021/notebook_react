@@ -38,7 +38,7 @@ export default function Left(prop: leftProp) {
         else return Promise.resolve();
     }
     const onFinish = async () => {
-        nav('/search/' + form.getFieldValue('keyword'));
+        nav(`/search/?keyword=${form.getFieldValue('keyword')}`);
     }
     const logout = async () => {
         try {
@@ -50,7 +50,13 @@ export default function Left(prop: leftProp) {
         } catch (e) {
 
         }
-
+    }
+    const scrollTop = () => {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth' // 平滑滚动
+        })
     }
     const set = new Set;
     prop.text.forEach((item) => {
@@ -59,9 +65,6 @@ export default function Left(prop: leftProp) {
     return <>
         <div className={styles.wrapper}>
             <div className={styles.upWrapper}>
-                {/* <span style={{ "margin": "0 auto" }}>
-                    
-                </span> */}
                 <img className={styles.avatar} src='https://img0.baidu.com/it/u=3267993544,3801388513&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=666' />
                 <div onClick={jump} className={styles.title}>
                     JLY Blog
@@ -95,7 +98,7 @@ export default function Left(prop: leftProp) {
                         : <ButtonList path='/login/' >登录</ButtonList>
                 }
                 <ButtonList path='/' >首页</ButtonList>
-                <ButtonList path='/' >回到顶部</ButtonList>
+                <div style={{ width: "100%" }} onClick={scrollTop}><ButtonList path='/' >回到顶部</ButtonList></div>
                 <Form
                     form={form}
                     name="log"

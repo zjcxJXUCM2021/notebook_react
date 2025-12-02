@@ -1,5 +1,6 @@
 import styles from './center.module.less'
-import CollapseBoard from '../textCard/CollapseBoard'
+import CollapseBoard from '../../../../components/textCard/CollapseBoard'
+import { useContext } from 'react';
 interface keyArr {
     [key: string]: Text[]
 }
@@ -8,7 +9,9 @@ interface center {
     setPinText: (id: number) => Promise<void>,
     setCancelPinText: (id: number) => Promise<void>
 }
-export default function Center(prop: center) {
+export default function Center() {
+    const context = useContext(InfoContext);
+    text = { context?.texts } setPinText = { context?.setPinText } setCancelPinText = { context?.setCancelPinText }
     return <>
         <div className={styles.wrapper}>
             <div className={styles.singleText}>

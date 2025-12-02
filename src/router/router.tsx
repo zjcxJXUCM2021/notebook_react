@@ -5,6 +5,7 @@ import TextShow from "../pages/text/textShow";
 import MainLayout from "../layout/mainLayout/mainLayout";
 import NotFound from "../pages/404/notFound";
 import Upload from "../pages/upload/upload";
+import SearchText from "../pages/search/searchText";
 
 const adminRouters = [{}];
 
@@ -21,6 +22,9 @@ const showRouters = [
     }, {
         path: '/404/',
         element: <NotFound />
+    }, {
+        path: '/search/',
+        element: <SearchText />
     }
 ];
 
