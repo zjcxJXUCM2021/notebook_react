@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { loginRequest, registerAdmin, sendCodeAdmin } from "../../../../api/http/api";
 import styles from './register.module.less'
+import VerificationCode from "../../../../components/verificationCode/verificationCode";
 type FieldType = {
     username: string;
     password: string;
@@ -21,7 +22,13 @@ export default function Register() {
     let [countdown, setcountdown] = useState(60);
     let [emailState, setemailState] = useState(true);
     let timeRef = useRef(0);
-    let sendCode = async () => {
+
+    let [isCheckCode, setIsCheckCode] = useState(false);
+    const checkCode = () => {
+        setIsCheckCode(true);
+    }
+    const sendCode = async () => {
+        setIsCheckCode(false);
         setemailState(true);
         try {
             message.loading({ content: "发送验证码中", key: "sendCode" });
@@ -177,7 +184,7 @@ export default function Register() {
                             size="large"
                             disabled={emailState}
                             // 当用户点击按钮时，触发 sendCode
-                            onClick={sendCode}
+                            onClick={checkCode}
                         >
                             {countdown == 0 || countdown == 60 ? '发送验证码' : countdown}
                         </Button>
@@ -198,5 +205,6 @@ export default function Register() {
                 </Form.Item>
             </Form>
         </div>
+        <VerificationCode isCorrect={sendCode} isCheckCode={isCheckCode} closeModel={() => setIsCheckCode(false)}></VerificationCode>
     </>
 }
