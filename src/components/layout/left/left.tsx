@@ -4,7 +4,7 @@ import { MailOutlined, MoonOutlined } from '@ant-design/icons'
 import Icon from '../../icon/Icon'
 import useDarkStore from '../../../store/darkMode'
 import ButtonList from '../../buttonList/buttonList'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import useUserStore from '../../../store/user'
 import { useEffect, useState } from 'react'
 import useTextFontSize from '../../../store/state/textFontSize'
@@ -18,14 +18,17 @@ interface leftProp {
 }
 export default function Left(prop: leftProp) {
     const UserStore = useUserStore();
-
     const location = useLocation();
     const [textFontSize, setTextFontSize] = useState(1);
     const textFontSizeStore = useTextFontSize();
     const nav = useNavigate();
     const [form] = Form.useForm();
     let darkStore = useDarkStore();
+    const [param, setParam] = useSearchParams();
 
+    useEffect(() => {
+        form.setFieldsValue({ keyword: param.get("keyword") });
+    }, [param.get("keyword")]);
     useEffect(() => {
         textFontSizeStore.setFontSize(String(textFontSize));
     }, [textFontSize])
@@ -34,7 +37,7 @@ export default function Left(prop: leftProp) {
     }
     const jump = () => nav('/');
     const validateKeyword = (_: any, keyword: string): Promise<void> => {
-        if (!keyword.trim()) return Promise.reject(new Error('请输入文字'));
+        if (!keyword?.trim()) return Promise.reject(new Error('请输入文字'));
         else return Promise.resolve();
     }
     const onFinish = async () => {

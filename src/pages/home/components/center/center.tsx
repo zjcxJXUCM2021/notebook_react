@@ -1,5 +1,5 @@
 import styles from './center.module.less'
-import CollapseBoard from '../../../../components/textCard/CollapseBoard'
+import CollapseBoard from '../../../../components/textCard/textCard'
 import { useContext } from 'react';
 interface keyArr {
     [key: string]: Text[]

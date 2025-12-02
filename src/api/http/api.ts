@@ -1,6 +1,6 @@
 import axios from "axios";
 import { message } from "antd";
-import useUserStore from '../../store/user'
+import useUserStore from "../../store/user";
 interface response<T> {
     code: number,
     message: string,
@@ -9,6 +9,7 @@ interface response<T> {
 interface loginRes {
     accessToken: string,
     message: string,
+    role: string,
 }
 
 export const http = axios.create({
@@ -34,17 +35,18 @@ http.interceptors.response.use(//接收时的拦截器
         else if (response.data.code == 401) {//当accesstoken过期时
             message.error('未登录');
             console.log("续期TOken");
-            // const renewToken = async () => {
-            //     const res = await renewTokenRequest(useUserStore.getState().accessToken);
-            //     useUserStore.getState().setAccessToken(res);
-            // }
-            // renewToken();
+            const renewToken = async () => {
+                const res = await renewTokenRequest(useUserStore.getState().accessToken);
+                useUserStore.getState().setAccessToken(res);
+            }
+            renewToken();
             return Promise.reject(response.data.message);
         } else {
             message.error('网络异常');
             return Promise.reject(response.data.message);
         }
     }, errorHandle => {
+        console.log(errorHandle);
         message.error('网络异常');
         return Promise.reject("error");
     }

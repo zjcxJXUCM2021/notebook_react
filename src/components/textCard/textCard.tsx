@@ -1,4 +1,4 @@
-import styles from './CollapseBoard.module.less'
+import styles from './textCard.module.less'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { CloseOutlined, PushpinOutlined, LoadingOutlined } from '@ant-design/icons';
@@ -10,7 +10,7 @@ interface props {
     setPinText: (id: number) => Promise<void>,
     setCancelPinText: (id: number) => Promise<void>
 };
-export default function CollapseBoard(props: props) {
+export default function TextCard(props: props) {
     const singleItem = props;
     const nav = useNavigate();// 获取那个“缓存池”管理者
     const jump = (id: number) => {

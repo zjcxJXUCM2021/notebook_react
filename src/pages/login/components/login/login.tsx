@@ -35,6 +35,7 @@ export default function Login() {
             const res = await loginRequest({ email: value.email, password: value.password, remember: value.remember });
             if (form.getFieldValue('remember')) {
                 UserStore.setAccessToken(res.accessToken);
+                UserStore.setRole(res.role);
                 localStorage.setItem("accessToken", res.accessToken);
             }
             else
