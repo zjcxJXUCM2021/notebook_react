@@ -13,11 +13,11 @@ export default function Login_register() {
                     items={[{
                         label: `登录`,
                         key: '1',
-                        children: <Login />,
+                        children: <div className={styles.fadeContent}><Login /></div>
                     }, {
                         label: `注册`,
                         key: '2',
-                        children: <Register />,
+                        children: <div className={styles.fadeContent}><Register /></div>,
                     }]}
                 />
             </div>

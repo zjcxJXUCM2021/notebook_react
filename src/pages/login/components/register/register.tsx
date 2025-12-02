@@ -1,9 +1,9 @@
 import { Form, Input, Button, Space, App } from "antd"
-import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { loginRequest, registerAdmin, sendCodeAdmin } from "../../../../api/http/api";
+import styles from './register.module.less'
 type FieldType = {
     username: string;
     password: string;
@@ -102,17 +102,18 @@ export default function Register() {
         else return Promise.resolve();
     }
     return <>
-        <div className={commonStyles.center}>
+        <div className={styles.wrapper}>
             <Form
                 form={form}
                 name="reg"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 24 }}
-                style={{ maxWidth: 600 }}
                 initialValues={{ remember: true }}
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
+                layout="vertical"
+                style={{ width: "500px" }}
             >
                 <Form.Item<FieldType>
                     label="用户名:"
@@ -133,7 +134,7 @@ export default function Register() {
                     name="confirmPassword"
                     dependencies={['password']}
                     rules={[
-                        { required: true, message: '请再次输入密码' },
+                        { required: true, message: '' },
                         ({ getFieldValue }) => ({
                             validator(_, value) {
                                 if (!value) {
@@ -197,6 +198,5 @@ export default function Register() {
                 </Form.Item>
             </Form>
         </div>
-
     </>
 }

@@ -4,6 +4,8 @@ import type { FormProps } from 'antd';
 import { loginRequest } from "../../../../api/http/api";
 import { useNavigate } from "react-router";
 import useUserStore from "../../../../store/user";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import styles from './login.module.less'
 type FieldType = {
     email: string;
     password: string;
@@ -53,43 +55,46 @@ export default function Login() {
         console.log('Failed:', errorInfo);
     };
     return <>
-        <div className={commonStyles.center}>
+        <div className={styles.wrapper}>
             <Form
                 form={form}
                 name="log"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 24 }}
-                style={{}}
+
                 initialValues={{ remember: true }}
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
+                layout="vertical"
+                requiredMark={false}
+                style={{ width: "500px" }}
             >
                 <Form.Item<FieldType>
-                    label="邮箱:"
+                    label="电子邮箱"
                     name="email"
                     rules={[{ required: true, validator: validateEmail }]}
                 >
-                    <Input />
+                    <Input prefix={<MailOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} size="large" />
                 </Form.Item>
                 <Form.Item<FieldType>
-                    label="密码:"
+                    label="密码"
                     name="password"
                     rules={[{ required: true, message: '请输入密码' }]}
                 >
-                    <Input.Password />
+                    <Input.Password prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} size="large" />
                 </Form.Item>
                 <Form.Item<FieldType>
                     name="remember"
                     valuePropName="checked"
-                    wrapperCol={{ offset: 8, span: 16 }}
+                    wrapperCol={{ offset: 0, span: 24 }}
                 >
                     <Checkbox>记住我</Checkbox>
                 </Form.Item>
 
                 <Form.Item label={null} >
                     <Button type="primary" htmlType="submit">
-                        登录
+                        立即登录
                     </Button>
                 </Form.Item>
             </Form>
