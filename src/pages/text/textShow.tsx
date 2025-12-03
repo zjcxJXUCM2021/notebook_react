@@ -32,7 +32,7 @@ export default function TextShow() {
             }
         }
         init();
-    }, [])
+    }, [id])
     useEffect(() => {
         setTextFontSize(Number(textFontSizeStore.fontSize));
     }, [textFontSizeStore.fontSize])

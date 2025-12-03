@@ -75,14 +75,14 @@ export default function Login() {
                     name="email"
                     rules={[{ required: true, validator: validateEmail }]}
                 >
-                    <Input prefix={<MailOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} size="large" />
+                    <Input prefix={<MailOutlined />} size="large" />
                 </Form.Item>
                 <Form.Item<FieldType>
                     label="密码"
                     name="password"
                     rules={[{ required: true, message: '请输入密码' }]}
                 >
-                    <Input.Password prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} size="large" />
+                    <Input.Password prefix={<LockOutlined />} size="large" />
                 </Form.Item>
                 <Form.Item<FieldType>
                     name="remember"
@@ -92,9 +92,9 @@ export default function Login() {
                     <Checkbox>记住我</Checkbox>
                 </Form.Item>
 
-                <Form.Item label={null} >
-                    <Button type="primary" htmlType="submit">
-                        立即登录
+                <Form.Item<FieldType> >
+                    <Button type="primary" htmlType="submit" block size="large">
+                        登录
                     </Button>
                 </Form.Item>
             </Form>

@@ -198,8 +198,8 @@ export default function Register() {
                     <Input />
                 </Form.Item>
 
-                <Form.Item label={null}>
-                    <Button type="primary" htmlType="submit">
+                <Form.Item<FieldType>>
+                    <Button type="primary" htmlType="submit" block size="large">
                         注册
                     </Button>
                 </Form.Item>
