@@ -149,3 +149,7 @@ export const updateText = async (Text: Text): Promise<string> => {
         }),
     }))
 }
+
+export const getTags = async (): Promise<string[]> => {
+    return await http.post('/articleGet/getAllTags/');
+}

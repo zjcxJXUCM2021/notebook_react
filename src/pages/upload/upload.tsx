@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './upload.module.less'
 import { Editor } from '@tinymce/tinymce-react'
-import { Form, Button, Input, ConfigProvider, theme, Modal } from 'antd';
-import { getText, updateText, uploadText } from '../../api/http/api';
+import { Form, Button, Input, ConfigProvider, theme, Modal, AutoComplete } from 'antd';
+import { getTags, getText, updateText, uploadText } from '../../api/http/api';
 import axios from 'axios';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router';
 import useDarkStore from '../../store/darkMode';
@@ -14,6 +14,10 @@ interface FieldType {
     title: string,
     tag: string,
 }
+interface searchTag {
+    value: string,
+    label: string
+}
 export default function Upload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const editorRef = useRef<any>(null);
@@ -22,6 +26,7 @@ export default function Upload() {
     const [param] = useSearchParams();
     const [content, setContent] = useState('');
     const id = param.get('id');
+    const [options, setOptions] = useState<searchTag[]>([]);
 
     const blocker = useBlocker(
         ({ currentLocation, nextLocation }) => {
@@ -35,7 +40,6 @@ export default function Upload() {
 
     );
     useEffect(() => {
-
         const init = async () => {
             try {
                 const res = await getText(Number(id));
@@ -154,8 +158,6 @@ export default function Upload() {
 
     };
 
-
-
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -169,6 +171,26 @@ export default function Upload() {
         blocker.reset?.()
         setIsModalOpen(false);
     };
+
+    const onSearch = async (keyword: string) => {
+        try {
+            const res = await getTags();
+            let newOptions = res.map((item) => ({
+                value: item, // 唯一标识，必须不重复
+                label: item  // 下拉列表中显示的文字
+            }));
+            newOptions = newOptions.filter((item) => {
+                if (item.value.toLowerCase().includes(keyword)) return true;
+                else return false;
+            })
+            setOptions(newOptions)
+        } catch {
+
+        }
+    }
+    const onSelect = (e: searchTag) => {
+        console.log(e);
+    }
     return <>
         <div className={styles.wrapper}>
             <Form
@@ -189,16 +211,23 @@ export default function Upload() {
                         <Form.Item<FieldType>
                             label="章节:"
                             name="tag"
-                            rules={[{ required: true, message: '请输入密码' }]}
+                            rules={[{ required: true, message: '请输入Tag' }]}
                         // initialValue={title} 只有第一次才能设置初始值，即组件挂载时
                         >
-                            <Input />
+                            {/* <Input /> */}
+                            <AutoComplete
+                                options={options}
+                                style={{ width: 200 }}
+                                onSelect={onSelect}//选中时
+                                onSearch={onSearch}
+                                showSearch={true}
+                                placeholder="input here"
+                            />
                         </Form.Item>
                         <Form.Item<FieldType>
                             label="标题:"
                             name="title"
                             rules={[{ required: true, }]}
-                        // initialValue={tag}
                         >
                             <Input />
                         </Form.Item>
@@ -214,6 +243,8 @@ export default function Upload() {
                             onInit={(_evt, editor) => editorRef.current = editor}
                             initialValue={content}
                             init={{
+                                skin: 'oxide-dark',       // 界面变黑
+                                content_css: 'dark',    // 内容区域也变黑
                                 height: '600px',
                                 menubar: false,
                                 plugins: [
