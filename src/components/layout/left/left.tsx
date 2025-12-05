@@ -56,10 +56,9 @@ export default function Left(prop: leftProp) {
     }
     const scrollTop = () => {
         window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: 'smooth' // 平滑滚动
-        })
+            top: 0,        // 要滑动到的位置
+            behavior: "smooth"  // 平滑滚动
+        });
     }
     const set = new Set;
     prop.text.forEach((item) => {
@@ -101,7 +100,7 @@ export default function Left(prop: leftProp) {
                         : <ButtonList path='/login/' >登录</ButtonList>
                 }
                 <ButtonList path='/' >首页</ButtonList>
-                <div style={{ width: "100%" }} onClick={scrollTop}><ButtonList path='/' >回到顶部</ButtonList></div>
+                <div style={{ width: "100%" }} onClick={scrollTop}><ButtonList>回到顶部</ButtonList></div>
                 <Form
                     form={form}
                     name="log"
@@ -115,7 +114,7 @@ export default function Left(prop: leftProp) {
                     name="keyword"
                     rules={[{ required: false, validator: validateKeyword }]}
                 >
-                        <Input placeholder='文章标题' />
+                        <Input placeholder='搜索文章' />
                     </Form.Item></Form>
                 {
                     location.pathname.slice(0, 5) == '/text' ? <div style={{ width: '100%' }}>

@@ -43,7 +43,7 @@ export default function TextCard(props: props) {
         setIsCancelPinLoading(false);
     }
     return <>
-        <div className='chapter'>
+        <div>
             <div className={styles.chapterTitle} onClick={() => { open() }}>{singleItem.tags}</div>
             <div>
 

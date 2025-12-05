@@ -1,17 +1,17 @@
 @homeTopPadding: 1%;
 
 :root {
-    --darkColor: white;
-    --fontColor: #191919;
+    --darkColor: var(--color-bg-base);
+    --fontColor: var(--color-text);
     --fontColorInverse: white;
-    --allBackground: #EEEDEE;
+    --allBackground: var(--color-bg-layout);
 }
 
 [data-theme='dark'] {
-    --darkColor: #1E1E1E;
-    --fontColor: #E0E0D4;
+    --darkColor: var(--color-bg-base);
+    --fontColor: var(--color-text);
     ---fontColorInverse: #191919;
-    --allBackground: #121212; //背景黑色
+    --allBackground: var(--color-bg-layout);
 }
 
 .center {

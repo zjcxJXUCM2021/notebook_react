@@ -4,8 +4,9 @@ import router from './router/router'
 import { useEffect, useState } from 'react'
 import useDarkStore from './store/darkMode'
 import useUserStore from './store/user'
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, theme } from 'antd'
 import getThemeConfig from './css/themeConfig/themeConfig'
+import { GlobalStyle } from './components/cssinJS/GlobalStyle'
 function App() {
   const DarkMode = useDarkStore();
   const UserStore = useUserStore();
@@ -16,10 +17,8 @@ function App() {
     else DarkMode.setDark(false);
 
     if (isDark) {
-      // 如果是深色模式，设为 dark
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
-      // 关键点：如果是浅色模式，要设为 light (或者移除该属性)
       document.documentElement.setAttribute('data-theme', 'light');
     }
     setThemeConfig(getThemeConfig());
@@ -30,9 +29,13 @@ function App() {
       UserStore.setAccessToken(accessToken);
     }
   }, [])
+
+
   return (
     <>
+
       <ConfigProvider theme={themeConfig}>
+        <GlobalStyle></GlobalStyle>
         <RouterProvider router={router} />
       </ConfigProvider>
 

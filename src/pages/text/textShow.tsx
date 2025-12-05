@@ -41,18 +41,46 @@ export default function TextShow() {
     }
     const htmlOptions = {
         replace: (domNode: any) => {
-            if (domNode.name === 'img')
+            if (domNode.name === 'img') {
+                // 1. 将 style 从 attribs 中解构出来，避免直接传给组件导致报错
+                const { style: rawStyle, ...restAttribs } = domNode.attribs;
+
+                // (可选) 如果你想保留原 html 里的 style，可以在这里转换
+                // const styleObj = rawStyle ? styleToObject(rawStyle) : {};
+
                 return (
                     <div className="image-wrapper">
-                        <Image  {...domNode.attribs} style={{ border: '0px solid red' }} />
+                        <Image
+                            {...restAttribs}
+
+                            style={{
+                                border: '0px solid red',
+                            }}
+                            preview={{
+                                onVisibleChange: (visible) => {
+                                    // 获取 html 和 body 元素
+                                    const html = document.documentElement;
+
+                                    if (visible) {
+                                        // 打开时：强制锁定
+                                        // 保存当前的 overflow 值以便恢复（可选，        简单粗暴则直接置空）
+                                        html.style.overflow = 'hidden';
+                                    } else {
+                                        // 关闭时：恢复默认
+                                        html.style.overflow = '';
+                                    }
+                                }
+                            }}
+                        />
                     </div>
                 );
+            }
         }
-    }
+    };
     return <>
         <div className={styles.sumWrapper}>
             <div className={styles.titleWrapper}>
-                <div className={styles.tag}>
+                <div className={styles.tag} >
                     {text?.tag}
                 </div>
                 <div className={styles.title}>
@@ -63,7 +91,7 @@ export default function TextShow() {
 
         </div>
         {/* <div dangerouslySetInnerHTML={{ __html: text?.content || '加载中' }} style={{ fontSize: `${textFontSize}rem` }} /> */}
-        <div style={{ fontSize: `${textFontSize}rem` }}>
+        <div style={{ fontSize: `${textFontSize}rem`, overscrollBehavior: "contain" }}>
 
             {parse(text?.content || '加载中', htmlOptions)}
 
