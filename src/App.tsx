@@ -4,7 +4,7 @@ import router from './router/router'
 import { useEffect, useState } from 'react'
 import useDarkStore from './store/darkMode'
 import useUserStore from './store/user'
-import { ConfigProvider, theme } from 'antd'
+import { ConfigProvider } from 'antd'
 import getThemeConfig from './css/themeConfig/themeConfig'
 import { GlobalStyle } from './components/cssinJS/GlobalStyle'
 function App() {

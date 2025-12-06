@@ -12,6 +12,7 @@ const getThemeConfig = () => {
             colorPrimary: '#2E7FF2',
             borderRadius: 5,
             fontSize: 16,
+            colorBgSpotlight: "#868686ff"
         },
         components: {//对某个组件单独设置
             Input: {

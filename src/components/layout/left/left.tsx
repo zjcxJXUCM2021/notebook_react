@@ -84,7 +84,7 @@ export default function Left(prop: leftProp) {
                 </div>
 
                 <Divider size='small' />
-                <div className={styles.sup}>
+                <div className={styles.support}>
                     <Icon type='icon-react1'></Icon>
                     <Icon type='icon-tengxunyun'></Icon>
                     <Icon type='icon-qiniuyuncunchu'></Icon>

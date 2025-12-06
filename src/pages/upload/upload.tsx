@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import styles from './upload.module.less'
 import { Editor } from '@tinymce/tinymce-react'
 import { Form, Button, Input, ConfigProvider, theme, Modal, AutoComplete } from 'antd';
@@ -7,7 +7,6 @@ import { getTags, getText, updateText, uploadText } from '../../api/http/api';
 import axios from 'axios';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router';
 import useDarkStore from '../../store/darkMode';
-import EasyModel from '../../components/model/easyModel';
 
 
 interface FieldType {
@@ -27,8 +26,11 @@ export default function Upload() {
     const [content, setContent] = useState('');
     const id = param.get('id');
     const [options, setOptions] = useState<searchTag[]>([]);
+    const { isDark } = useDarkStore();
 
-    const blocker = useBlocker(
+    const skin = isDark ? "oxide-dark" : "oxide";
+    const contentCss = isDark ? "dark" : "default";
+    const blocker = useBlocker(//阻塞跳转上一页
         ({ currentLocation, nextLocation }) => {
             if (nextLocation.pathname == '/') return false;
             else if (currentLocation.pathname !== nextLocation.pathname && content) {
@@ -54,7 +56,7 @@ export default function Upload() {
         init();
     }, [])
     useEffect(() => {
-        const handler = (e: any) => {
+        const handler = (e: any) => {//阻塞刷新
             e.preventDefault();
             e.returnValue = ""; // 必须有，Chrome 要求这样才能拦截
         };
@@ -136,27 +138,27 @@ export default function Upload() {
         });
     };
 
-    const themeConfig = () => {
-        if (useDarkStore().isDark)
-            return {
-                "components": {
-                    "Form": {
-                        "labelColor": "rgba(255,255,255,0.88)",
-                        "algorithm": theme.darkAlgorithm,
-                    },
-                    "Input": {
-                        "algorithm": theme.darkAlgorithm,
-                        "colorBgContainer": "#141414",
-                        "colorText": "rgba(255,255,255,0.85)",
-                        "colorBorder": "rgb(29,29,29)"
-                    }
+    // const themeConfig = () => {
+    //     if (useDarkStore().isDark)
+    //         return {
+    //             "components": {
+    //                 "Form": {
+    //                     "labelColor": "rgba(255,255,255,0.88)",
+    //                     "algorithm": theme.darkAlgorithm,
+    //                 },
+    //                 "Input": {
+    //                     "algorithm": theme.darkAlgorithm,
+    //                     "colorBgContainer": "#141414",
+    //                     "colorText": "rgba(255,255,255,0.85)",
+    //                     "colorBorder": "rgb(29,29,29)"
+    //                 }
 
-                },
-            }
-        else
-            return {};
+    //             },
+    //         }
+    //     else
+    //         return {};
 
-    };
+    // };
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -206,33 +208,30 @@ export default function Upload() {
                 layout='vertical'
             >
                 <div className={styles.inputWrapper}>
-                    <ConfigProvider
-                        theme={themeConfig()}>
-                        <Form.Item<FieldType>
-                            label="章节:"
-                            name="tag"
-                            rules={[{ required: true, message: '请输入Tag' }]}
-                        // initialValue={title} 只有第一次才能设置初始值，即组件挂载时
-                        >
-                            {/* <Input /> */}
-                            <AutoComplete
-                                options={options}
-                                style={{ width: 200 }}
-                                onSelect={onSelect}//选中时
-                                onSearch={onSearch}
-                                showSearch={true}
-                                placeholder="input here"
-                            />
-                        </Form.Item>
-                        <Form.Item<FieldType>
-                            label="标题:"
-                            name="title"
-                            rules={[{ required: true, }]}
-                        >
-                            <Input />
-                        </Form.Item>
-                    </ConfigProvider>
 
+                    <Form.Item<FieldType>
+                        label="章节:"
+                        name="tag"
+                        rules={[{ required: true, message: '请输入Tag' }]}
+                    // initialValue={title} 只有第一次才能设置初始值，即组件挂载时
+                    >
+                        {/* <Input /> */}
+                        <AutoComplete
+                            options={options}
+
+                            onSelect={onSelect}//选中时
+                            onSearch={onSearch}
+                            showSearch={true}
+                            placeholder="请输入章节"
+                        />
+                    </Form.Item>
+                    <Form.Item<FieldType>
+                        label="标题:"
+                        name="title"
+                        rules={[{ required: true, }]}
+                    >
+                        <Input placeholder='请输入标题' />
+                    </Form.Item>
 
                 </div>
                 <Form.Item>
@@ -243,8 +242,8 @@ export default function Upload() {
                             onInit={(_evt, editor) => editorRef.current = editor}
                             initialValue={content}
                             init={{
-                                skin: 'oxide-dark',       // 界面变黑
-                                content_css: 'dark',    // 内容区域也变黑
+                                skin: skin,       // 界面变黑
+                                content_css: contentCss,    // 内容区域也变黑
                                 height: '600px',
                                 menubar: false,
                                 plugins: [
