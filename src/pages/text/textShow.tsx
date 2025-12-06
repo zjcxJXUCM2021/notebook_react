@@ -91,10 +91,10 @@ export default function TextShow() {
 
         </div>
         {/* <div dangerouslySetInnerHTML={{ __html: text?.content || '加载中' }} style={{ fontSize: `${textFontSize}rem` }} /> */}
-        <div style={{ fontSize: `${textFontSize}rem`, overscrollBehavior: "contain" }}>
+        <div style={{ fontSize: `${textFontSize}rem`, }} className={styles.text}>
 
             {parse(text?.content || '加载中', htmlOptions)}
 
-        </div>
+        </div >
     </>
 }

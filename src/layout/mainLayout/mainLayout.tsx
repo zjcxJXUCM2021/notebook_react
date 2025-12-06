@@ -66,7 +66,7 @@ export default function MainLayout() {
         }
     }
 
-    const value = useMemo(() => ({ texts, setPinText, setCancelPinText }), [texts]);
+    const value = useMemo(() => ({ texts, setPinText, setCancelPinText }), [texts]);//这里传过去的是排好序的
 
     return <>
         <div className={styles.base}>

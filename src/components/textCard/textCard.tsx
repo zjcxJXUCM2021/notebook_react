@@ -16,8 +16,8 @@ export default function TextCard(props: props) {
     const jump = (id: number) => {
         nav(`/text/${id}`)
     }
-    const [isPinLoading, setIsPinLoading] = useState<Boolean>(false);
-    const [isCancelPinLoading, setIsCancelPinLoading] = useState<Boolean>(false);
+    const [isPinLoading, setIsPinLoading] = useState<number[]>([]);
+    const [isCancelPinLoading, setIsCancelPinLoading] = useState<number[]>([]);
     const userStore = useUserStore();
 
 
@@ -32,15 +32,15 @@ export default function TextCard(props: props) {
 
     const setPin = async (e: React.MouseEvent, id: number) => {
         e.stopPropagation(); // 阻止事件冒泡到父级 div
-        setIsPinLoading(true);
+        setIsPinLoading([...isPinLoading, id]);
         await props.setPinText(id);
-        setIsPinLoading(false);
+        setIsPinLoading((state) => state.filter((item) => item != id));
     }
     const setCancelPin = async (e: React.MouseEvent, id: number) => {
         e.stopPropagation(); // 阻止事件冒泡到父级 div
-        setIsCancelPinLoading(true);
+        setIsCancelPinLoading([...isCancelPinLoading, id]);
         await props.setCancelPinText(id);
-        setIsCancelPinLoading(false);
+        setIsCancelPinLoading((state) => state.filter((item) => item != id));
     }
     return <>
         <div>
@@ -55,8 +55,8 @@ export default function TextCard(props: props) {
                             <div>{item.title}
                             </div>
                             {userStore.accessToken ? <span>
-                                {item.state ? '' : (isPinLoading ? <div className={styles.setPin}><LoadingOutlined /></div> : <PushpinOutlined onClick={(e) => setPin(e, item.id)} className={styles.setPin} />)}
-                                {item.state == '快速访问' ? (isCancelPinLoading ? <div className={styles.setPin}><LoadingOutlined /></div> : <CloseOutlined onClick={(e) => setCancelPin(e, item.id)} className={styles.setCancelPin} />) : ''}
+                                {item.state ? '' : (isPinLoading.includes(item.id) ? <div className={styles.setPin}><LoadingOutlined /></div> : <PushpinOutlined onClick={(e) => setPin(e, item.id)} className={styles.setPin} />)}
+                                {item.state == '快速访问' ? (isCancelPinLoading.includes(item.id) ? <div className={styles.setPin}><LoadingOutlined /></div> : <CloseOutlined onClick={(e) => setCancelPin(e, item.id)} className={styles.setCancelPin} />) : ''}
                             </span> : ''}
                         </div>
                     </div>

@@ -5,6 +5,7 @@ interface userStore {
     role: string,
     setAccessToken: (newToken: string) => void,
     setRole: (newRole: string) => void,
+    logout: () => void
 }
 
 const useUserStore = create<userStore>((set) => {
@@ -13,11 +14,16 @@ const useUserStore = create<userStore>((set) => {
         role: "",
         setAccessToken: (newToken: string) => {
             set({ accessToken: newToken })
-            // 写法 B：如果你需要用到老状态（比如计数器），也可以简写
-            // set((state) => ({ accessToken: newToken }))
+            localStorage.setItem("accessToken", newToken);
         },
         setRole: (newRole: string) => {
             set({ role: newRole });
+            localStorage.setItem("role", newRole);
+        },
+        logout: () => {
+            localStorage.removeItem('role');
+            localStorage.removeItem('accessToken');
+            set({ accessToken: "", role: "" });
         }
     }
 })

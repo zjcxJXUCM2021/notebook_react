@@ -5,9 +5,7 @@ import TextCard from '../../components/textCard/textCard';
 import { textKeyList } from '../../utils/textKeyList';
 
 export default function Home() {
-
     const context = useContext(InfoContext);
-
     const keyList = textKeyList(context.texts);
 
     return <>

@@ -8,7 +8,7 @@ interface response<T> {
 }
 interface loginRes {
     accessToken: string,
-    message: string,
+    message?: string,
     role: string,
 }
 
@@ -28,6 +28,7 @@ http.interceptors.request.use(config => {//发送时的拦截器
 
 http.interceptors.response.use(//接收时的拦截器
     response => {//网络上没错
+        console.log(response.data);
         if (response.data.code < 300) {
             return response.data.data;
         }
@@ -152,4 +153,8 @@ export const updateText = async (Text: Text): Promise<string> => {
 
 export const getTags = async (): Promise<string[]> => {
     return await http.post('/articleGet/getAllTags/');
+}
+
+export const getInfo = async (): Promise<loginRes> => {
+    return await http.post('/admin/renewAccessToken/');
 }

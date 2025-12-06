@@ -46,10 +46,7 @@ export default function Left(prop: leftProp) {
     const logout = async () => {
         try {
             await logoutAdmin();
-            localStorage.removeItem('email');
-            localStorage.removeItem('accessToken');
-            // localStorage.clear();
-            UserStore.setAccessToken('');
+            UserStore.logout();
         } catch (e) {
 
         }
@@ -86,7 +83,7 @@ export default function Left(prop: leftProp) {
                 <Divider size='small' />
                 <div className={styles.support}>
                     <Icon type='icon-react1'></Icon>
-                    <Icon type='icon-tengxunyun'></Icon>
+                    <Icon type='icon-tengxunyun2'></Icon>
                     <Icon type='icon-qiniuyuncunchu'></Icon>
                 </div>
             </div>

@@ -38,7 +38,6 @@ export default function Login() {
             if (form.getFieldValue('remember')) {
                 UserStore.setAccessToken(res.accessToken);
                 UserStore.setRole(res.role);
-                localStorage.setItem("accessToken", res.accessToken);
             }
             else
                 UserStore.setAccessToken(res.accessToken);
