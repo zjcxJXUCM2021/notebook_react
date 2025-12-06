@@ -5,7 +5,7 @@ import { textKeyList } from '../../utils';
 import TextCard from '../../components/textCard/textCard';
 import { useQueryClient } from '@tanstack/react-query';
 import styles from './searchText.module.less'
-import { message } from 'antd';
+import { App } from 'antd';
 
 export default function SearchText() {
     const [searchParams] = useSearchParams();
@@ -13,6 +13,7 @@ export default function SearchText() {
     const [keyList, setKeyList] = useState<keyArr>({});
     const [texts, setTexts] = useState<Text[]>([]);
     const queryClient = useQueryClient();
+    const { message } = App.useApp();
 
     const [loading, setLoading] = useState(true);
     useEffect(() => {

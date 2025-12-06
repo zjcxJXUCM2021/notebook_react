@@ -1,4 +1,4 @@
-import { Button, Input, message, Modal } from 'antd'
+import { App, Button, Input, message, Modal } from 'antd'
 import styles from './verification.module.less'
 import { useCallback, useEffect, useState } from 'react';
 import Captcha from 'react-captcha-code';
@@ -11,6 +11,7 @@ interface verificationProp {
 export default function VerificationCode(prop: verificationProp) {
     const [code, setCode] = useState('');
     const [resCode, setResCode] = useState('');
+    const app = App.useApp();
 
     const handleOk = () => {
         if (code === resCode) {
@@ -18,7 +19,7 @@ export default function VerificationCode(prop: verificationProp) {
 
         }
         else {
-            message.error({ content: "验证码错误", duration: 2 });
+            app.message.error({ content: "验证码错误", duration: 2 });
         }
 
     };

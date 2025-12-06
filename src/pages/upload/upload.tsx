@@ -138,28 +138,6 @@ export default function Upload() {
         });
     };
 
-    // const themeConfig = () => {
-    //     if (useDarkStore().isDark)
-    //         return {
-    //             "components": {
-    //                 "Form": {
-    //                     "labelColor": "rgba(255,255,255,0.88)",
-    //                     "algorithm": theme.darkAlgorithm,
-    //                 },
-    //                 "Input": {
-    //                     "algorithm": theme.darkAlgorithm,
-    //                     "colorBgContainer": "#141414",
-    //                     "colorText": "rgba(255,255,255,0.85)",
-    //                     "colorBorder": "rgb(29,29,29)"
-    //                 }
-
-    //             },
-    //         }
-    //     else
-    //         return {};
-
-    // };
-
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -208,7 +186,6 @@ export default function Upload() {
                 layout='vertical'
             >
                 <div className={styles.inputWrapper}>
-
                     <Form.Item<FieldType>
                         label="章节:"
                         name="tag"
@@ -218,7 +195,6 @@ export default function Upload() {
                         {/* <Input /> */}
                         <AutoComplete
                             options={options}
-
                             onSelect={onSelect}//选中时
                             onSearch={onSearch}
                             showSearch={true}

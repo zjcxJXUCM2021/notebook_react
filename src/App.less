@@ -11,6 +11,11 @@ body {
 
 
 html {
-  overflow-y: scroll;
+  scrollbar-gutter: stable;
   height: 100%;
+}
+
+html::-webkit-scrollbar {
+  width: 0px;
+  height: 0;
 }

@@ -3,7 +3,11 @@ import Basement from '../../components/basement/basement'
 import { Tabs } from 'antd'
 import Login from './components/login/login'
 import Register from './components/register/register'
+import { useEffect } from 'react'
 export default function Login_register() {
+    useEffect(() => {
+        document.title = '登录';
+    }, [])
     return <>
         <Basement>
             <div className={styles.title}>

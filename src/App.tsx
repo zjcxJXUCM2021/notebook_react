@@ -1,4 +1,4 @@
-import { RouterProvider } from 'react-router'
+import { RouterProvider, useLocation } from 'react-router'
 import './App.less'
 import router from './router/router'
 import { useEffect, useState } from 'react'
@@ -13,11 +13,15 @@ function App() {
   const UserStore = useUserStore();
   let { isDark } = DarkMode;
   let [themeConfig, setThemeConfig] = useState({});
+
   useEffect(() => {
     setThemeConfig(getThemeConfig());
   }, [isDark])
+
+
   useEffect(() => {//取出token,设置全局变量,和后端进行检验
     const init = async () => {
+
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {
         try {
@@ -27,8 +31,6 @@ function App() {
         } catch {
           UserStore.logout();
         }
-
-
       }
     }
     init();

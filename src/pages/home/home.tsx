@@ -1,13 +1,18 @@
 import styles from './home.module.less'
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { InfoContext } from '../../layout/mainLayout/mainLayout';
 import TextCard from '../../components/textCard/textCard';
 import { textKeyList } from '../../utils/textKeyList';
+import { useLocation } from 'react-router';
 
 export default function Home() {
     const context = useContext(InfoContext);
     const keyList = textKeyList(context.texts);
-
+    const location = useLocation();
+    useEffect(() => {
+        if (location.pathname == '/')
+            document.title = "JLYBLOG";
+    }, [location])
     return <>
         <div className={styles.wrapper}>
             <div className={styles.singleText}>
