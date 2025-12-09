@@ -2,13 +2,11 @@ import styles from './mainLayout.module.less'
 import Left from '../../components/layout/left/left'
 import Right from '../../components/layout/right/right'
 import { getAllText, setPinTextHttp, setUnPinTextHttp } from '../../api/http/api'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router'
 import Basement from '../../components/basement/basement'
 import { useQueryClient } from '@tanstack/react-query'
-interface keyArr {
-    [key: string]: Text[]
-};
+
 
 interface info {
     texts: Text[],

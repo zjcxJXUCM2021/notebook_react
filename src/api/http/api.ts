@@ -14,15 +14,16 @@ interface loginRes {
 
 export const http = axios.create({
     baseURL: `${import.meta.env.VITE_BASE_URL}`,
+    // baseURL: 'https://jlyproject.cn/api',
     withCredentials: true,//跨域时是否携带cookie
     timeout: 100000,
 })
 
 http.interceptors.request.use(config => {//发送时的拦截器
+    console.log(config);
     const token = localStorage.getItem('token');
     if (token)
         config.headers['Authorization'] = 'Bearer ' + token;
-
     return config;
 });
 
@@ -44,8 +45,8 @@ http.interceptors.response.use(//接收时的拦截器
             message.error('网络异常');
             return Promise.reject(response.data.message);
         }
-    }, errorHandle => {
-        message.error('网络异常');
+    }, errorInfo => {
+        message.error(errorInfo.data);
         return Promise.reject("error");
     }
 )

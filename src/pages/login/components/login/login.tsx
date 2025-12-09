@@ -1,5 +1,4 @@
 import { Form, Checkbox, Input, Button, App } from "antd"
-import commonStyles from '@/css/commonStyles/commonStyles.module.less'
 import type { FormProps } from 'antd';
 import { loginRequest } from "../../../../api/http/api";
 import { useNavigate } from "react-router";

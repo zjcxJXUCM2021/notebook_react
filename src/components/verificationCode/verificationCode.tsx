@@ -1,6 +1,5 @@
-import { App, Button, Input, message, Modal } from 'antd'
-import styles from './verification.module.less'
-import { useCallback, useEffect, useState } from 'react';
+import { App, Button, Input, Modal } from 'antd'
+import { useCallback, useState } from 'react';
 import Captcha from 'react-captcha-code';
 
 interface verificationProp {

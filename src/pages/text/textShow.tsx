@@ -17,6 +17,11 @@ export default function TextShow() {
     const userStore = useUserStore()
     const app = App.useApp();
     useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
         const init = async () => {
             if (!id) {
                 nav('/404/');
@@ -86,12 +91,11 @@ export default function TextShow() {
                 </div >
             </div>
             {userStore.role == '管理员' ? <Button onClick={() => jump()}>修改</Button> : ''}
-
         </div>
             {/* <div dangerouslySetInnerHTML={{ __html: text?.content || '加载中' }} style={{ fontSize: `${textFontSize}rem` }} /> */}
             <div style={{ fontSize: `${textFontSize}rem`, }} className={styles.text}>
 
-                {parse(text?.content || '加载中', htmlOptions)}
+                {isLoading ? <Skeleton paragraph={{ rows: 10 }} /> : parse((text?.content || ''), htmlOptions)}
 
             </div ></>
         }

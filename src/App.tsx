@@ -1,4 +1,4 @@
-import { RouterProvider, useLocation } from 'react-router'
+import { RouterProvider } from 'react-router'
 import './App.less'
 import router from './router/router'
 import { useEffect, useState } from 'react'
@@ -18,20 +18,20 @@ function App() {
     setThemeConfig(getThemeConfig());
   }, [isDark])
 
-
   useEffect(() => {//取出token,设置全局变量,和后端进行检验
     const init = async () => {
-
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {
         try {
           const res = await getInfo();
           UserStore.setAccessToken(res.accessToken);
           UserStore.setRole(res.role);
+          UserStore.setIsLoading(false);
         } catch {
           UserStore.logout();
+          UserStore.setIsLoading(false);
         }
-      }
+      } else UserStore.setIsLoading(false);
     }
     init();
   }, [])

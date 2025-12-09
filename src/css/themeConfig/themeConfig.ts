@@ -23,7 +23,7 @@ const getThemeConfig = () => {
             }
         }
     };
-    if (isDark) {
+    if (isDark || Boolean(localStorage.getItem("isDark") == 'true')) {
         themeConfig = {
             algorithm: theme.darkAlgorithm,
             ...themeConfig,

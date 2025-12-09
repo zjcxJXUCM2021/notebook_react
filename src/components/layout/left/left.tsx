@@ -1,5 +1,5 @@
 import styles from './left.module.less'
-import { Input, Avatar, Tooltip, Button, Divider, Form, Slider } from 'antd'
+import { Input, Tooltip, Button, Divider, Form, Slider, Skeleton, Modal } from 'antd'
 import { MailOutlined, MoonOutlined } from '@ant-design/icons'
 import Icon from '../../icon/Icon'
 import useDarkStore from '../../../store/darkMode'
@@ -24,7 +24,8 @@ export default function Left(prop: leftProp) {
     const nav = useNavigate();
     const [form] = Form.useForm();
     let darkStore = useDarkStore();
-    const [param, setParam] = useSearchParams();
+    const [param] = useSearchParams();
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         form.setFieldsValue({ keyword: param.get("keyword") });
@@ -44,12 +45,7 @@ export default function Left(prop: leftProp) {
         nav(`/search/?keyword=${form.getFieldValue('keyword')}`);
     }
     const logout = async () => {
-        try {
-            await logoutAdmin();
-            UserStore.logout();
-        } catch (e) {
-
-        }
+        showModal();
     }
     const scrollTop = () => {
         window.scrollTo({
@@ -61,66 +57,117 @@ export default function Left(prop: leftProp) {
     prop.text.forEach((item) => {
         set.add(item.tag);
     })
+
+    const showModal = () => {
+        setOpen(true);
+    };
+
+    const handleOk = async () => {
+        setOpen(false);
+        try {
+            await logoutAdmin();
+            UserStore.logout();
+        } catch (e) {
+
+        }
+    };
+
+    const handleCancel = () => {
+        setOpen(false);
+    };
     return <>
         <div className={styles.wrapper}>
             <div className={styles.upWrapper}>
-                <img className={styles.avatar} src='https://img0.baidu.com/it/u=3267993544,3801388513&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=666' />
-                <div onClick={jump} className={styles.title}>
-                    JLY Blog
-                </div>
-                <div className={styles.sum}>
-                    {prop.text.length}篇文档<Divider type="vertical" />{set.size}个专题
-                </div>
-                <div className={styles.btn}>
-                    <Tooltip title="2631854038@qq.com">
-                        <Button type="primary" shape="circle" icon={<MailOutlined />} />
-                    </Tooltip>
-                    <Tooltip title="黑夜模式">
-                        <Button type="primary" shape="circle" icon={<MoonOutlined />} onClick={toDark} />
-                    </Tooltip>
-                </div>
+                {UserStore.isLoading ? <Skeleton.Avatar size={200}
+                    shape="circle" >
+                </Skeleton.Avatar> : ''}
+                <Skeleton paragraph={{ rows: 6 }} loading={UserStore.isLoading}>
+                    <img className={styles.avatar} src='http://redsources.jlyproject.cn/20a8608b-2567-4d5a-984b-b0f0d9ac579b.jpg' />
+                    <div onClick={jump} className={styles.title}>
+                        JLY Blog
+                    </div>
+                    <Skeleton loading={!Boolean(prop.text.length)}>
+                        <div className={styles.sum}>
+                            {prop.text.length}篇文档<Divider type="vertical" />{set.size}个专题
+                        </div>
+                    </Skeleton>
 
-                <Divider size='small' />
-                <div className={styles.support}>
-                    <Icon type='icon-react1'></Icon>
-                    <Icon type='icon-tengxunyun2'></Icon>
-                    <Icon type='icon-qiniuyuncunchu'></Icon>
-                </div>
+                    <div className={styles.btn}>
+                        <Tooltip title="2631854038@qq.com">
+                            <Button type="primary" shape="circle" icon={<MailOutlined />} />
+                        </Tooltip>
+                        <Tooltip title="黑夜模式">
+                            <Button type="primary" shape="circle" icon={<MoonOutlined />} onClick={toDark} />
+                        </Tooltip>
+                    </div>
+
+                    <Divider size='small' />
+                    <div className={styles.support}>
+                        <Icon type='icon-react1'></Icon>
+                        <Icon type='icon-tengxunyun2'></Icon>
+                        <Icon type='icon-qiniuyuncunchu'></Icon>
+                    </div>
+                </Skeleton>
+
             </div>
             <div className={styles.downWrapper} >
-                {
-                    UserStore.accessToken ?
-                        <>{localStorage.getItem("email") ? <><ButtonList path='/upload/' >上传</ButtonList></> : ''}
-                            <div onClick={() => { logout() }} style={{ width: "100%" }}>
-                                <ButtonList >注销</ButtonList>
-                            </div> </>
-                        : <ButtonList path='/login/' >登录</ButtonList>
-                }
-                <ButtonList path='/' >首页</ButtonList>
-                <div style={{ width: "100%" }} onClick={scrollTop}><ButtonList>回到顶部</ButtonList></div>
-                <Form
-                    form={form}
-                    name="log"
-                    labelCol={{ span: 8 }}
-                    wrapperCol={{ span: 24 }}
-                    style={{}}
-                    initialValues={{ remember: true }}
-                    onFinish={onFinish}
-                    autoComplete="off"
-                ><Form.Item<formType>
-                    name="keyword"
-                    rules={[{ required: false, validator: validateKeyword }]}
-                >
-                        <Input placeholder='搜索文章' />
-                    </Form.Item></Form>
-                {
-                    location.pathname.slice(0, 5) == '/text' ? <div style={{ width: '100%' }}>
-                        字体大小
-                        <Slider value={textFontSize} onChange={(value) => setTextFontSize(value)} max={3} min={0.5} step={0.1} />
-                    </div> : ''
-                }
+                {/* {UserStore.isLoading ? <Skeleton paragraph={{ rows: 4 }} /> : ()} */}
+
+                <Skeleton loading={UserStore.isLoading} paragraph={{ rows: 4 }}>
+                    <>
+                        {
+                            UserStore.accessToken ?
+                                <>{UserStore.role == '管理员' ? <><ButtonList path='/upload/' >上传</ButtonList></> : ''}
+                                    <div onClick={() => { logout() }} style={{ width: "100%" }}>
+                                        <ButtonList >注销</ButtonList>
+                                    </div> </>
+                                : <ButtonList path='/login/' >登录</ButtonList>
+                        }
+
+                        < ButtonList path='/' >首页</ButtonList >
+                        <div style={{ width: "100%" }} onClick={scrollTop}><ButtonList>回到顶部</ButtonList></div>
+                        <Form
+                            form={form}
+                            name="log"
+                            labelCol={{ span: 8 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{}}
+                            initialValues={{ remember: true }}
+                            onFinish={onFinish}
+                            autoComplete="off"
+                        ><Form.Item<formType>
+                            name="keyword"
+                            rules={[{ required: false, validator: validateKeyword }]}
+                        >
+                                <Input placeholder='搜索文章' />
+                            </Form.Item></Form>
+                        {
+                            location.pathname.slice(0, 5) == '/text' ? <div style={{ width: '100%' }}>
+                                字体大小
+                                <Slider value={textFontSize} onChange={(value) => setTextFontSize(value)} max={3} min={0.5} step={0.1} />
+                            </div> : ''
+                        }
+                    </>
+                </Skeleton>
             </div>
 
         </div >
+
+        <Modal
+            open={open}
+            title="提示"
+            onOk={handleOk}
+            onCancel={handleCancel}
+            footer={[
+                <Button key="submit" type="primary" onClick={handleOk}>
+                    确定
+                </Button>,
+                <Button key="back" onClick={handleCancel}>
+                    取消
+                </Button>
+            ]}
+        >
+            确定注销吗
+        </Modal>
     </>
 }

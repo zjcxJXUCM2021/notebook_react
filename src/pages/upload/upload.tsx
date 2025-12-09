@@ -1,8 +1,8 @@
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './upload.module.less'
 import { Editor } from '@tinymce/tinymce-react'
-import { Form, Button, Input, ConfigProvider, theme, Modal, AutoComplete } from 'antd';
+import { Form, Button, Input, Modal, AutoComplete, App } from 'antd';
 import { getTags, getText, updateText, uploadText } from '../../api/http/api';
 import axios from 'axios';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router';
@@ -27,21 +27,25 @@ export default function Upload() {
     const id = param.get('id');
     const [options, setOptions] = useState<searchTag[]>([]);
     const { isDark } = useDarkStore();
-
+    const { message } = App.useApp();
     const skin = isDark ? "oxide-dark" : "oxide";
     const contentCss = isDark ? "dark" : "default";
+    const [tags, setTags] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+
     const blocker = useBlocker(//阻塞跳转上一页
-        ({ currentLocation, nextLocation }) => {
-            if (nextLocation.pathname == '/') return false;
-            else if (currentLocation.pathname !== nextLocation.pathname && content) {
-                showModal();
-                return true;
+        ({ historyAction }) => {
+            if (historyAction !== 'POP') {
+                return false;
             }
-            else return false;
+
+            showModal();
+            return true;
         }
 
     );
     useEffect(() => {
+        document.title = "上传文档";
         const init = async () => {
             try {
                 const res = await getText(Number(id));
@@ -51,6 +55,12 @@ export default function Upload() {
                     tag: res.tag
                 });
             } catch {
+            }
+
+            try {
+                setTags(await getTags());
+            } catch {
+
             }
         }
         init();
@@ -72,13 +82,15 @@ export default function Upload() {
         }
         const currentContent = editorRef.current.getContent();
         try {
+            message.info({ key: "upload", content: "上传中" });
             if (!id) {
-                await uploadText({
+                const res = await uploadText({
                     id: 0,
                     content: currentContent,
                     title: value.title,
                     tag: value.tag,
                 } as Text);
+                nav(`/text/${res}`);
             } else {
                 await updateText({
                     id: Number(id),
@@ -86,14 +98,17 @@ export default function Upload() {
                     title: value.title,
                     tag: value.tag,
                 } as Text)
+                nav(`/text/${id}`);
             }
-            nav('/');
-        } catch {
-            console.log("失败");
+            setUploading(true);
+            message.success({ key: "upload", content: "上传成功", duration: 2 });
+
+        } catch (error) {
+            message.error("上传失败");
         }
 
     }
-    const onFinishFailed = async (value: any) => {
+    const onFinishFailed = async () => {
 
     }
     const handleImageUpload = (blobInfo: any, progress: (percent: number) => void) => {
@@ -102,8 +117,7 @@ export default function Upload() {
             // 注意：这里假设后端接收文件的参数名为 'file'。
             // 如果你的后端是用 'image' 或其他名字，请把 'file' 改掉。
             formData.append('file', blobInfo.blob(), blobInfo.filename());
-
-            axios.post('http://124.221.73.180:3001/upload/photo/', formData, {
+            axios.post('https://jlyproject.cn/api/upload/photo/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -113,8 +127,7 @@ export default function Upload() {
                     }
                 }
             }).then(response => {
-                const data = response.data.location;
-                console.log(data, "返回的是");
+                const data = response.data.data.location;
                 // 根据后端返回格式解析图片 URL
                 // 情况1：直接返回 URL 字符串
                 if (typeof data === 'string') {
@@ -154,8 +167,7 @@ export default function Upload() {
 
     const onSearch = async (keyword: string) => {
         try {
-            const res = await getTags();
-            let newOptions = res.map((item) => ({
+            let newOptions = tags.map((item) => ({
                 value: item, // 唯一标识，必须不重复
                 label: item  // 下拉列表中显示的文字
             }));
@@ -168,9 +180,7 @@ export default function Upload() {
 
         }
     }
-    const onSelect = (e: searchTag) => {
-        console.log(e);
-    }
+    // const debounceTag = useDebounce(onSearch, 500);
     return <>
         <div className={styles.wrapper}>
             <Form
@@ -195,7 +205,7 @@ export default function Upload() {
                         {/* <Input /> */}
                         <AutoComplete
                             options={options}
-                            onSelect={onSelect}//选中时
+                            // onSelect={}//选中时
                             onSearch={onSearch}
                             showSearch={true}
                             placeholder="请输入章节"
@@ -243,7 +253,7 @@ export default function Upload() {
                 </Form.Item>
                 <Form.Item>
                     <div className={styles.btnWrapper}>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" loading={uploading}>
                             提交
                         </Button>
                     </div>

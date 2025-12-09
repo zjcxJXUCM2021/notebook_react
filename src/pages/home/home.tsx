@@ -4,6 +4,7 @@ import { InfoContext } from '../../layout/mainLayout/mainLayout';
 import TextCard from '../../components/textCard/textCard';
 import { textKeyList } from '../../utils/textKeyList';
 import { useLocation } from 'react-router';
+import { Skeleton } from 'antd';
 
 export default function Home() {
     const context = useContext(InfoContext);
@@ -20,7 +21,7 @@ export default function Home() {
                     return <div key={item}>
                         <TextCard tags={item} texts={keyList[item]} setPinText={context?.setPinText} setCancelPinText={context?.setCancelPinText}></TextCard>
                     </div>
-                }) : "加载中"}
+                }) : <Skeleton paragraph={{ rows: 10 }} />}
             </div>
         </div>
     </>

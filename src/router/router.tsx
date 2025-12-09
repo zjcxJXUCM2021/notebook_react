@@ -7,7 +7,7 @@ import NotFound from "../pages/404/notFound";
 import Upload from "../pages/upload/upload";
 import SearchText from "../pages/search/searchText";
 
-const adminRouters = [{}];
+// const adminRouters = [{}];
 
 const showRouters = [
     {
