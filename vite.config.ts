@@ -12,6 +12,19 @@ export default defineConfig(({ command }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            } else if (id.includes('tinymce')) {
+              return 'tinymce'
+            } else return 'main';
+          }
+        }
+      }
+    },
     server: {
       proxy: {//现在的路径等于api + 请求头
         '/api': { // 匹配所有以 /api 开头的请求

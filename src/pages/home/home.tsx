@@ -1,4 +1,4 @@
-import styles from './home.module.less'
+import styles from './home.module.less';
 import { useContext, useEffect } from 'react';
 import { InfoContext } from '../../layout/mainLayout/mainLayout';
 import TextCard from '../../components/textCard/textCard';
