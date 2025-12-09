@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface userStore {
     accessToken: string,//refreshToken在cookie中
@@ -10,28 +11,35 @@ interface userStore {
     setIsLoading: (newState: boolean) => void
 }
 
-const useUserStore = create<userStore>((set) => {
-    return {
-        accessToken: "",
-        role: "",
-        isLoading: true,
-        setAccessToken: (newToken: string) => {
-            localStorage.setItem("accessToken", newToken);
-            set({ accessToken: newToken, });
-        },
-        setRole: (newRole: string) => {
-            set({ role: newRole });
-            localStorage.setItem("role", newRole);
-        },
-        logout: () => {
-            localStorage.removeItem('role');
-            localStorage.removeItem('accessToken');
-            set({ accessToken: "", role: "" });
-        },
-        setIsLoading: (newState: boolean) => {
-            set({ isLoading: newState });
+const useUserStore = create<userStore>()(
+    persist(((set) => {
+        return {
+            accessToken: "",
+            role: "",
+            isLoading: true,
+            setAccessToken: (newToken: string) => {
+                set({ accessToken: newToken, });
+            },
+            setRole: (newRole: string) => {
+                set({ role: newRole });
+            },
+            logout: () => {
+                set({ accessToken: "", role: "" });
+            },
+            setIsLoading: (newState: boolean) => {
+                set({ isLoading: newState });
+            }
         }
-    }
-})
+    }), {
+        name: "userStore",
+        partialize: (state) => {
+            return {
+                accessToken: state.accessToken,
+            }
+        }
+
+
+    })
+)
 
 export default useUserStore;

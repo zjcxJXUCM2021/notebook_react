@@ -20,8 +20,7 @@ function App() {
 
   useEffect(() => {//取出token,设置全局变量,和后端进行检验
     const init = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
+      if (UserStore.accessToken) {
         try {
           const res = await getInfo();
           UserStore.setAccessToken(res.accessToken);

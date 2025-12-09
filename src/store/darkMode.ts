@@ -1,27 +1,26 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-interface isDark {
+interface DarkState {
     isDark: boolean,
     updateDark: () => void,
     setDark: (state: boolean) => void
 }
 
-const useDarkStore = create((set): isDark => {
-    return {
-        isDark: false,
-        updateDark: (): void => {
-            set((state: isDark) => {
-                console.log("全局变量由", state.isDark, !state.isDark);
-                localStorage.setItem("isDark", String(!state.isDark));
-                return {
-                    isDark: !state.isDark
-                }
-            })
-        },
-        setDark: (state): void => {
-            set({ isDark: state });
-            localStorage.setItem("isDark", String(state));
+const useDarkStore = create<DarkState>()(
+    persist(
+        (set) => ({
+            isDark: false,
+            // persist 中间件会自动检测到 isDark 变化并保存
+            updateDark: () => set((state) => {
+                return { isDark: !state.isDark };
+            }),
+            setDark: (active) => set({ isDark: active }),
+        }),
+        {
+            // 这是 localStorage 里的 Key，所有状态都会存在这里面
+            name: "isDarkZustand",
         }
-    }
-})
+    )
+);
 export default useDarkStore;
