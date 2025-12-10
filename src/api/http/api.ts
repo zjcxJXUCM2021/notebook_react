@@ -14,35 +14,63 @@ interface loginRes {
 
 export const http = axios.create({
     baseURL: `${import.meta.env.VITE_BASE_URL}`,
-    // baseURL: 'https://jlyproject.cn/api',
     withCredentials: true,//跨域时是否携带cookie
-    timeout: 100000,
+    timeout: 10000,
 })
 
-http.interceptors.request.use(config => {//发送时的拦截器
-    console.log(config);
-    const token = localStorage.getItem('token');
-    if (token)
-        config.headers['Authorization'] = 'Bearer ' + token;
+http.interceptors.request.use(config => {//发送时的拦截器,加上token
+    const accessTokentoken = useUserStore.getState().accessToken;
+    if (accessTokentoken)
+        config.headers['Authorization'] = 'Bearer ' + accessTokentoken;
     return config;
 });
 
+let isRefreshing = false;
+let requests: Function[] = [];
+
 http.interceptors.response.use(//接收时的拦截器
-    response => {//网络上没错
-        console.log(response.data);
+    async (response) => {//网络上没错
+        console.log(response, "这里");
         if (response.data.code < 300) {
             return response.data.data;
         }
         else if (response.data.code == 401) {//当accesstoken过期时
-            message.error('未登录');
-            const renewToken = async () => {
-                const res = await renewTokenRequest(useUserStore.getState().accessToken);
-                useUserStore.getState().setAccessToken(res);
+            const config = response.config;
+            if (isRefreshing == false) {
+                isRefreshing = true;
+                try {
+                    const res = await renewTokenRequest();
+                    useUserStore.getState().setAccessToken(res);
+                    requests.forEach((cb) => cb(res));//通知每个函数，执行一下
+                    // 2. 清空队列
+                    requests = [];
+                    // 3. 重试当前请求
+                    const config = response.config;
+                    config.headers['Authorization'] = 'Bearer ' + res;
+                    return http(config);
+                } catch (e) {
+                    requests.forEach((cb) => cb(null)); // 通知队列里的请求失败
+                    requests = [];
+                    message.error('登录已过期，请重新登录');
+                    useUserStore.getState().logout(); // 假设store里有logout方法
+                } finally {
+                    isRefreshing = false;
+                }
+
+            } else {
+                return new Promise((resolve) => {
+                    // 我们把一个“回调函数”推入队列
+                    requests.push(
+                        (token: string) => {
+                            // 这个函数现在不会执行，它只是被存起来了
+                            // 等到将来被调用，并且传入 token 时，它才会执行下面的代码：
+                            config.headers['Authorization'] = 'Bearer ' + token; // 1. 换新票
+                            resolve(http(config)); // 2. 重新发请求，并把结果返回给外面的 Promise
+                        }
+                    );
+                });
             }
-            renewToken();
-            return Promise.reject(response.data.message);
         } else {
-            message.error('网络异常');
             return Promise.reject(response.data.message);
         }
     }, errorInfo => {
@@ -50,6 +78,7 @@ http.interceptors.response.use(//接收时的拦截器
         return Promise.reject("error");
     }
 )
+
 
 export const getAllText = async (): Promise<Text[]> => { return await http.post('article/getAllText/') };
 
@@ -122,12 +151,8 @@ export const logoutAdmin = async (): Promise<void> => {
     return await http.post('/token/logoutToken/');
 }
 
-const renewTokenRequest = async (AccessToken: string): Promise<string> => {
-    return await http.post('/token/renewAccessToken/', null, {
-        params: {
-            accessToken: AccessToken,
-        }
-    })
+const renewTokenRequest = async (): Promise<string> => {
+    return await http.post('/token/renewAccessToken/');
 }
 
 export const uploadText = async (Text: Text): Promise<string> => {

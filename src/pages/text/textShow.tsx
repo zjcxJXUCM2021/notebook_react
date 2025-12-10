@@ -46,7 +46,7 @@ export default function TextShow() {
         setTextFontSize(Number(textFontSizeStore.fontSize));
     }, [textFontSizeStore.fontSize])
     const jump = () => {
-        nav(`/upload/?id=${id}`);
+        nav(`/admin/upload/?id=${id}`);
     }
     const htmlOptions = {
         replace: (domNode: any) => {

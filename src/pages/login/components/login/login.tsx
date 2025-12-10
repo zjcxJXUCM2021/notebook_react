@@ -40,7 +40,6 @@ export default function Login() {
             }
             else
                 UserStore.setAccessToken(res.accessToken);
-            if (form.getFieldValue('email') == '2631854038@qq.com') localStorage.setItem('email', '2631854038@qq.com');
             message.success({ content: '登录成功', key: "login", duration: 2 });
             nav('/');
         } catch (e) {

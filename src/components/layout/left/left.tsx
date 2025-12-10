@@ -117,7 +117,7 @@ export default function Left(prop: leftProp) {
                     <>
                         {
                             UserStore.accessToken ?
-                                <>{UserStore.role == '管理员' ? <><ButtonList path='/upload/' >上传</ButtonList></> : ''}
+                                <>{UserStore.role == '管理员' ? <><ButtonList path='/admin/upload/' >上传</ButtonList></> : ''}
                                     <div onClick={() => { logout() }} style={{ width: "100%" }}>
                                         <ButtonList >注销</ButtonList>
                                     </div> </>

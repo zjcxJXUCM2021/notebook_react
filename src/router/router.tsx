@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router";
+import { createBrowserRouter } from "react-router";
 import Login_register from "../pages/login/Login_register";
 import Home from "../pages/home/home";
 import TextShow from "../pages/text/textShow";
