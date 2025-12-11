@@ -1,4 +1,4 @@
-import { RouterProvider } from 'react-router'
+import { RouterProvider, useNavigation } from 'react-router'
 import './App.less'
 import router from './router/router'
 import { useEffect, useState } from 'react'
@@ -8,6 +8,8 @@ import { ConfigProvider } from 'antd'
 import getThemeConfig from './css/themeConfig/themeConfig'
 import { GlobalStyle } from './components/cssinJS/GlobalStyle'
 import { getInfo } from './api/http/api'
+import LoadingTopLine from './components/loading/loading'
+import 'nprogress/nprogress.css'; // 必须引入这一行
 function App() {
   const DarkMode = useDarkStore();
   const UserStore = useUserStore();

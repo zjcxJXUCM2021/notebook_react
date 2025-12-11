@@ -9,7 +9,11 @@ import SearchText from "../pages/search/searchText";
 import AuthGuard from "./guard";
 import { lazy, Suspense, type ComponentType } from "react";
 import Loading from "../pages/loading/loading";
+import LoadingTopLine from "../components/loading/loading";
+import nProgress from "nprogress";
 
+
+const importTextShow = () => import('../pages/text/textShow');
 // 你的代码封装
 const lazyLoad = (dynamicImport: () => Promise<{ default: ComponentType<any> }>) => {
     const Component = lazy(dynamicImport);
@@ -17,7 +21,7 @@ const lazyLoad = (dynamicImport: () => Promise<{ default: ComponentType<any> }>)
         // 如果 Component 还没下载完，界面显示 fallback 里的 <Loading />
         // 下载完了，自动替换为 <Component />
         //如果这里是替换了父路由中的一个组件，就是替换子组件，而不是全屏显示
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<LoadingTopLine />}>
             <Component />
         </Suspense>
     );
@@ -37,7 +41,17 @@ const showRouters = [
         Component: Home
     }, {
         path: '/text/:id',
-        element: lazyLoad(() => import('../pages/text/textShow'))
+        // element: lazyLoad(importTextShow),
+        // loader: async () => {
+        //     await importTextShow();
+        //     return null; // 不需要返回数据，只需要阻塞
+        // }
+        lazy: async () => {
+            nProgress.start();
+            const { default: Component } = await import('../pages/text/textShow');
+            nProgress.done();
+            return { Component };
+        }
     }, {
         path: '/search/',
         element: <SearchText />
@@ -57,6 +71,9 @@ const router = createBrowserRouter([
         path: "admin/",
         element: <AuthGuard></AuthGuard>,
         children: adminRouters,
+    }, {
+        path: '/*',
+        element: <NotFound />
     }
 ]);
 export default router;
