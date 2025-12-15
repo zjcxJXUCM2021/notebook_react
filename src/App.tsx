@@ -9,6 +9,7 @@ import getThemeConfig from './css/themeConfig/themeConfig'
 import { GlobalStyle } from './components/cssinJS/GlobalStyle'
 import { getInfo } from './api/http/api'
 import 'nprogress/nprogress.css'; // 必须引入这一行
+import AiChat from './components/AIChat/AiChat'
 function App() {
   const DarkMode = useDarkStore();
   const UserStore = useUserStore();
@@ -42,6 +43,7 @@ function App() {
 
       <ConfigProvider theme={themeConfig}>
         <GlobalStyle></GlobalStyle>
+        <AiChat></AiChat>
         <RouterProvider router={router} />
       </ConfigProvider>
 

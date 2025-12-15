@@ -1,0 +1,57 @@
+.wrapper {
+    width: 10vh;
+    height: 10vw;
+    position: fixed;
+    background-color: red;
+    top: 0px;
+    left: 0px;
+
+    display: flex;
+    flex-direction: column;
+    z-index: 99999;
+
+
+}
+
+@keyframes zoomInEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+        /* 初始大小设为 0.2 避免完全看不见，比 0 更平滑 */
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.show {
+    animation: zoomInEffect 0.3s cubic-bezier(0.08, 0.82, 0.17, 1), moveX 0.1s linear forwards;
+    ;
+    animation-fill-mode: both; //进入出去都展示动画
+    //animation: moveX 0.1s linear forwards;
+}
+
+@keyframes moveX {
+    to {
+        transform: translateX(300px);
+    }
+}
+
+@keyframes moveY {
+    to {
+        transform: translateY(500px);
+    }
+}
+
+
+.title {
+    flex: 1;
+    background-color: green;
+    cursor: move;
+}
+
+.content {
+    flex: 5
+}
