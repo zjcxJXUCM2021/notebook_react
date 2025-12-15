@@ -2,15 +2,7 @@ import { useNavigate, useParams } from 'react-router';
 import { getText } from '../../api/http/api'
 import styles from './textShow.module.less'
 import { useEffect, useState } from 'react';
-import { App, Button, Image, Skeleton, Space } from 'antd'; // 引入 Space (可选)
-import {
-    DownloadOutlined, // 新增：下载图标
-    RotateLeftOutlined,
-    RotateRightOutlined,
-    ZoomInOutlined,
-    ZoomOutOutlined,
-    SwapOutlined // 用于翻转图标 (Antd默认图标通常是这些)
-} from '@ant-design/icons';
+import { App, Button, Image, Skeleton } from 'antd'; // 引入 Space (可选)
 import useTextFontSize from '../../store/state/textFontSize';
 import parse from 'html-react-parser';
 import useUserStore from '../../store/user';

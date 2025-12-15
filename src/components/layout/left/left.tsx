@@ -1,6 +1,6 @@
 import styles from './left.module.less'
 import { Input, Tooltip, Button, Divider, Form, Slider, Skeleton, Modal } from 'antd'
-import { MailOutlined, MoonOutlined } from '@ant-design/icons'
+import { GithubOutlined, MailOutlined, MoonOutlined } from '@ant-design/icons'
 import Icon from '../../icon/Icon'
 import useDarkStore from '../../../store/darkMode'
 import ButtonList from '../../buttonList/buttonList'
@@ -82,7 +82,7 @@ export default function Left(prop: leftProp) {
                     shape="circle" >
                 </Skeleton.Avatar> : ''}
                 <Skeleton paragraph={{ rows: 6 }} loading={UserStore.isLoading}>
-                    <img className={styles.avatar} src='http://redsources.jlyproject.cn/20a8608b-2567-4d5a-984b-b0f0d9ac579b.jpg' />
+                    <img className={styles.avatar} src='https://redsources.jlyproject.cn/20a8608b-2567-4d5a-984b-b0f0d9ac579b.jpg' />
                     <div onClick={jump} className={styles.title}>
                         JLY Blog
                     </div>
@@ -95,6 +95,9 @@ export default function Left(prop: leftProp) {
                     <div className={styles.btn}>
                         <Tooltip title="2631854038@qq.com">
                             <Button type="primary" shape="circle" icon={<MailOutlined />} />
+                        </Tooltip>
+                        <Tooltip title="github.com/zjcxJXUCM2021">
+                            <Button type="primary" shape="circle" icon={<GithubOutlined />} />
                         </Tooltip>
                         <Tooltip title="黑夜模式">
                             <Button type="primary" shape="circle" icon={<MoonOutlined />} onClick={toDark} />
@@ -111,16 +114,17 @@ export default function Left(prop: leftProp) {
 
             </div>
             <div className={styles.downWrapper} >
-                {/* {UserStore.isLoading ? <Skeleton paragraph={{ rows: 4 }} /> : ()} */}
 
                 <Skeleton loading={UserStore.isLoading} paragraph={{ rows: 4 }}>
                     <>
                         {
                             UserStore.accessToken ?
-                                <>{UserStore.role == '管理员' ? <><ButtonList path='/admin/upload/' >上传</ButtonList></> : ''}
+                                <>
+                                    {UserStore.role == '管理员' ? <><ButtonList path='/admin/upload/' >上传</ButtonList></> : ''}
                                     <div onClick={() => { logout() }} style={{ width: "100%" }}>
                                         <ButtonList >注销</ButtonList>
-                                    </div> </>
+                                    </div>
+                                </>
                                 : <ButtonList path='/login/' >登录</ButtonList>
                         }
 

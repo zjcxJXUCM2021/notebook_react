@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import styles from './buttonList.module.less'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Tooltip } from 'antd';
 
 
@@ -21,11 +21,13 @@ export default function ButtonList(prop: prop): ReactNode {
             <div className={styles.innerWrapper} onClick={jump} style={{ fontSize: prop.size }}>
                 {prop.children}
             </div>
-            : <Tooltip title={prop.children} placement="left">
-                <div className={styles.innerWrapper} onClick={jump} style={{ fontSize: prop.size }}>
-                    {prop.children}
-                </div>
-            </Tooltip>
+            : <Link to={prop.path} className={styles.innerWrapper}>
+                <Tooltip title={prop.children} placement="left">
+                    <div style={{ fontSize: prop.size }} className={styles.content}>
+                        {prop.children}
+                    </div>
+                </Tooltip>
+            </Link>
         }
 
     </>

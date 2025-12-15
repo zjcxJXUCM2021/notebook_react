@@ -1,14 +1,7 @@
 import { createBrowserRouter } from "react-router";
-import Login_register from "../pages/login/Login_register";
-import Home from "../pages/home/home";
 import MainLayout from "../layout/mainLayout/mainLayout";
 import NotFound from "../pages/404/notFound";
-import Upload from "../pages/upload/upload";
-import SearchText from "../pages/search/searchText";
 import AuthGuard from "./guard";
-import { Component, lazy, Suspense, type ComponentType } from "react";
-import Loading from "../pages/loading/loading";
-import LoadingTopLine from "../components/loading/loading";
 import nProgress from "nprogress";
 
 
@@ -28,7 +21,7 @@ const loadPage = async (path: string) => {
             Component: module.default
         }; // 返回组件,lazy需要这样的格式
     } finally {
-        nProgress.done(); // 无论成功失败，结束进度条
+        // nProgress.done(); // 无论成功失败，结束进度条
     }
 };
 // dynamicImport: () => Promise<{ default: ComponentType<any> }>
