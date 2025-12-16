@@ -1,0 +1,84 @@
+.chatWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: auto;
+}
+
+.chat {
+    background-color: red;
+    flex: 20;
+    height: 1000px;
+}
+
+.input {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.inputWrapper {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    background-color: green;
+    border-radius: 50px;
+    padding: 1% 5%;
+}
+
+.btnWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hiddenDiv {
+    background-color: yellow;
+    visibility: hidden;
+    max-height: 200px;
+    width: 100%;
+    height: 100%;
+    white-space: pre-wrap;
+    word-break: break-all;
+    grid-area: 1 / 1 / 2 / 2;
+    padding: 3px 11px;
+}
+
+.innerInputWrapper {
+    flex: 5;
+    display: grid;
+}
+
+.customTextarea {
+    height: 100%;
+    resize: none;
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.customTextarea::-webkit-scrollbar {
+    width: 8px;
+    /* 纵向滚动条的宽度 */
+    height: 16px;
+    /* 横向滚动条的高度 */
+}
+
+/* 2. 滚动条轨道 (背景) */
+.customTextarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+    /* 轨道的圆角 */
+}
+
+/* 3. 滚动条滑块 (移动部分) */
+.customTextarea::-webkit-scrollbar-thumb {
+    background: var(--color-bg-layout);
+    border-radius: 4px;
+    /* 滑块的圆角 */
+}
+
+/* 4. 鼠标悬停在滑块上时的样式 */
+.customTextarea::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

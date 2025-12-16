@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react'
 import styles from './AiChat.module.less'
-import { FloatButton } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import { Button, FloatButton, Menu, type MenuProps } from 'antd';
+import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '../icon/Icon';
+import AIContentLayout from './layout/AIContentLayout';
+import Sider from 'antd/es/layout/Sider';
 
 interface Pos {
     nowX: number,
@@ -13,7 +15,7 @@ interface Size {
     width: number,
     height: number,
 }
-
+type MenuItem = Required<MenuProps>['items'][number];
 export default function AiChat() {
     // 1. 位置状态
     let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 350, nowY: 100 });
@@ -23,8 +25,8 @@ export default function AiChat() {
     let [isShow, setIsShow] = useState(false);
     const [transformOrigin, setTransformOrigin] = useState({ x: 0, y: 0 });
 
-    // --- 拖拽移动逻辑 (Move) ---
-    let isDragging = useRef(false);
+    const [collapsed, setCollapsed] = useState(false);
+
     const dragOffset = useRef({ x: 0, y: 0 });
 
     const handleMove = (e: MouseEvent) => {
@@ -59,8 +61,8 @@ export default function AiChat() {
 
         // 更新宽高，同时设置最小宽高防止窗口消失 (例如 min 200px)
         setSize({
-            width: Math.max(200, resizeStart.current.startW + dx),
-            height: Math.max(200, resizeStart.current.startH + dy)
+            width: Math.max(300, resizeStart.current.startW + dx),
+            height: Math.max(300, resizeStart.current.startH + dy)
         });
     }
 
@@ -95,6 +97,21 @@ export default function AiChat() {
         setIsShow(!isShow);
     }
 
+    const toggleCollapsed = () => {
+        setCollapsed(!collapsed);
+    };
+
+    const items: MenuItem[] = [
+        {
+            key: 'grp',
+            type: 'group',
+            children: [
+                { key: '13', label: 'Option 13' },
+                { key: '14', label: 'Option 14' },
+            ],
+        },
+    ];
+
     return <>
         <FloatButton
             type="primary"
@@ -115,23 +132,53 @@ export default function AiChat() {
                 '--origin-y': `${transformOrigin.y}px`,
             } as React.CSSProperties}
         >
-            <div className={styles.title} onMouseDown={handleMouseDown} >
-                AI 助手 (拖拽移动)
-            </div>
-            <div className={styles.content}>
-                内容区域
-            </div>
 
-            <div className={styles.footer}>
-                {/* 绑定 Resize 事件 */}
-                <div
-                    className={styles.resize}
-                    onMouseDown={handleResizeMouseDown}
-                >
-                    {/* 这里可以用一个图标，或者简单的斜线符号 */}
-                    ⤡
+            <div className={styles.twoColumn}>
+                <div className={styles.left}>
+                    <Sider
+                        style={{ height: "100%" }}
+                        trigger={null}
+                        collapsible
+                        collapsed={collapsed}
+                        // 【核心代码】设置收起后的宽度为 0
+                        collapsedWidth={0}
+                        // 可选：设置 0 宽度的触发器样式，或者直接隐藏自带 trigger 使用自定义按钮
+                        zeroWidthTriggerStyle={{ top: '10px' }}
+                    >
+                        <Menu
+                            // onClick={onClick}
+                            style={{ height: "100%" }}
+                            defaultSelectedKeys={['1']}
+                            defaultOpenKeys={['sub1']}
+                            mode="inline"
+                            items={items}
+                            inlineCollapsed={collapsed}
+                        />
+                    </Sider>
+
+                </div>
+                <div className={styles.right}>
+                    <div className={styles.title} onMouseDown={handleMouseDown} >
+                        <Button type="primary" onClick={toggleCollapsed}>
+                            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        </Button>AI 助手 (拖拽移动)
+                    </div>
+                    <div className={styles.content}>
+                        <AIContentLayout></AIContentLayout>
+                    </div>
+
+                    <div className={styles.footer}>
+                        <span
+                            className={styles.resize}
+                            onMouseDown={handleResizeMouseDown}
+                        >
+                            ⤡
+                        </span>
+                    </div>
                 </div>
             </div>
+
+
         </div>
     </>
 }

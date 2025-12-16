@@ -58,18 +58,30 @@
     flex: 1;
     background-color: var(--color-bg-base);
     color: var(--color-text);
-    padding: 10px;
 }
 
 .footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
     background-color: var(--color-bg-base);
-    width: 100%;
-    background-color: red;
     color: var(--color-text);
+    display: flex;
+    justify-content: flex-end;
 }
 
 .resize {
-    width: 3%;
-    float: right;
     cursor: se-resize;
+}
+
+.twoColumn {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.right {
+    flex: auto;
+    display: flex;
+    flex-direction: column;
 }
