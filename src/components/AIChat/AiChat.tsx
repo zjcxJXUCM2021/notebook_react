@@ -1,65 +1,136 @@
 import React, { useRef, useState } from 'react'
 import styles from './AiChat.module.less'
 import { FloatButton } from 'antd';
-import { CommentOutlined, CustomerServiceOutlined } from '@ant-design/icons';
+import { CloseOutlined } from '@ant-design/icons';
+import Icon from '../icon/Icon';
 
-interface pos {
+interface Pos {
     nowX: number,
     nowY: number,
 }
+
+interface Size {
+    width: number,
+    height: number,
+}
+
 export default function AiChat() {
+    // 1. 位置状态
+    let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 350, nowY: 100 });
+    // 2. 【新增】尺寸状态 (默认 300x400)
+    let [size, setSize] = useState<Size>({ width: 300, height: 400 });
+
     let [isShow, setIsShow] = useState(false);
-    let [pos, setPos] = useState<pos>({ nowX: 24, nowY: 100 });
+    const [transformOrigin, setTransformOrigin] = useState({ x: 0, y: 0 });
+
+    // --- 拖拽移动逻辑 (Move) ---
     let isDragging = useRef(false);
     const dragOffset = useRef({ x: 0, y: 0 });
-    // let offsetX = 
-    const handleMouseMove = (e: any) => {
-        isDragging.current = true;
-        // 【关键】直接用 鼠标位置 - 固定的偏移量 = 盒子新位置
+
+    const handleMove = (e: MouseEvent) => {
         const newX = e.clientX - dragOffset.current.x;
         const newY = e.clientY - dragOffset.current.y;
         setPos({ nowX: newX, nowY: newY });
-
     }
-    const handleMouseDown = (e: any) => {
-        if (e.button != 0) return
-        // 【关键】计算并锁死这个偏移量
-        // 公式：偏移量 = 鼠标当前坐标 - 盒子当前坐标
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.button !== 0) return
+        e.stopPropagation(); // 防止冒泡
         dragOffset.current = {
             x: e.clientX - pos.nowX,
             y: e.clientY - pos.nowY
         };
-        isDragging.current = true;
-        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mousemove', handleMove);
         document.addEventListener('mouseup', handleMouseUp);
     }
-    const handleMouseUp = (e: any) => {
-        console.log("抬起");
-        isDragging.current = false;
-        document.removeEventListener('mousemove', handleMouseMove);
+
+    const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMove);
         document.removeEventListener('mouseup', handleMouseUp);
     }
 
-    const handleOpenChange = () => {
+    // --- 【新增】调整大小逻辑 (Resize) ---
+    const resizeStart = useRef({ x: 0, y: 0, startW: 0, startH: 0 });
+
+    const handleResizeMove = (e: MouseEvent) => {
+        // 计算移动距离
+        const dx = e.clientX - resizeStart.current.x;
+        const dy = e.clientY - resizeStart.current.y;
+
+        // 更新宽高，同时设置最小宽高防止窗口消失 (例如 min 200px)
+        setSize({
+            width: Math.max(200, resizeStart.current.startW + dx),
+            height: Math.max(200, resizeStart.current.startH + dy)
+        });
+    }
+
+    const handleResizeMouseUp = () => {
+        document.removeEventListener('mousemove', handleResizeMove);
+        document.removeEventListener('mouseup', handleResizeMouseUp);
+    }
+
+    const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation(); // 关键：防止触发父级的拖拽移动事件
+        e.preventDefault();  // 防止选中文字
+
+        // 记录按下时的 鼠标位置 和 初始宽高
+        resizeStart.current = {
+            x: e.clientX,
+            y: e.clientY,
+            startW: size.width,
+            startH: size.height
+        };
+
+        document.addEventListener('mousemove', handleResizeMove);
+        document.addEventListener('mouseup', handleResizeMouseUp);
+    }
+
+    // --- 显隐逻辑 ---
+    const toggleShow = (e: React.MouseEvent<HTMLElement>) => {
+        if (!isShow) {
+            const originX = e.clientX - pos.nowX;
+            const originY = e.clientY - pos.nowY;
+            setTransformOrigin({ x: originX, y: originY });
+        }
         setIsShow(!isShow);
     }
+
     return <>
-        <FloatButton.Group
-            trigger="click"
+        <FloatButton
             type="primary"
             style={{ right: 24, top: 24 }}
-            icon={<CustomerServiceOutlined />}
-            onOpenChange={handleOpenChange}
+            icon={isShow ? <CloseOutlined style={{ color: 'black' }} /> : <Icon type='icon-deepseek'></Icon>}
+            onClick={toggleShow}
+        />
+        <div
+            className={`${styles.wrapper} ${isShow ? styles.show : ''}`}
+            style={{
+                top: pos.nowY,
+                left: pos.nowX,
+                // 【新增】应用动态宽高
+                width: size.width,
+                height: size.height,
+                visibility: isShow ? 'visible' : "hidden",
+                '--origin-x': `${transformOrigin.x}px`,
+                '--origin-y': `${transformOrigin.y}px`,
+            } as React.CSSProperties}
         >
-            <FloatButton style={{ display: 'none' }} />
-        </FloatButton.Group>
-
-        <div className={`${styles.wrapper} ${isShow ? styles.show : ''}`} style={{ top: pos.nowY, left: pos.nowX, visibility: isShow ? 'visible' : "hidden" }}>
-            <div className={styles.title} onMouseDown={(e) => handleMouseDown(e)} >
-                title
+            <div className={styles.title} onMouseDown={handleMouseDown} >
+                AI 助手 (拖拽移动)
             </div>
             <div className={styles.content}>
-                content
+                内容区域
+            </div>
+
+            <div className={styles.footer}>
+                {/* 绑定 Resize 事件 */}
+                <div
+                    className={styles.resize}
+                    onMouseDown={handleResizeMouseDown}
+                >
+                    {/* 这里可以用一个图标，或者简单的斜线符号 */}
+                    ⤡
+                </div>
             </div>
         </div>
     </>

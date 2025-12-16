@@ -1,4 +1,4 @@
-import { theme, type ThemeConfig } from "antd";
+import { FloatButton, theme, type ThemeConfig } from "antd";
 import useDarkStore from "../../store/darkMode";
 
 
@@ -20,6 +20,10 @@ const getThemeConfig = () => {
             },
             Button: {
 
+            },
+            FloatButton: {
+                colorPrimary: "#f5f5f5",
+                "algorithm": true,
             }
         }
     };
