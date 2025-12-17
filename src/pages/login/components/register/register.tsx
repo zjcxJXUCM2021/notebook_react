@@ -111,6 +111,7 @@ export default function Register() {
     return <>
         <div className={styles.wrapper}>
             <Form
+
                 form={form}
                 name="reg"
                 labelCol={{ span: 8 }}

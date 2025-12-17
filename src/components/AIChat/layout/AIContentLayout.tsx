@@ -1,6 +1,7 @@
 import { Button, Form, Input, type FormProps } from 'antd'
 import styles from './AIContentLayout.module.less'
 import { UploadOutlined } from '@ant-design/icons';
+import getStreamData from '../../../api/http/aiChat';
 
 
 type FieldType = {
@@ -10,14 +11,34 @@ const { TextArea } = Input;
 export default function AIContentLayout() {
 
     const [form] = Form.useForm();
-    const keyword = Form.useWatch('keyword', form);
     const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
         console.log('Success:', values);
+        const history = [
+            { role: "user", content: "请用10个字形容一下春天的美好" }
+        ];
+
+        console.log("🚀 开始请求...");
+
+        // 调用函数
+        getStreamData(
+            history,
+            (token: any) => {
+                // 这里就是“流”的效果，字是一个一个蹦出来的
+                console.log(token) // 在控制台不换行打印
+            },
+            () => {
+                console.log("\n✅ 生成结束");
+            },
+            (err: any) => {
+                console.error("❌ 发生错误:", err);
+            }
+        );
     };
 
     const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
     return <>
         <div className={styles.chatWrapper}>
             <div className={styles.chat}>
@@ -40,25 +61,17 @@ export default function AIContentLayout() {
                     onFinishFailed={onFinishFailed}
                     autoComplete="off"
                 >
-                    {/* <Form.Item<FieldType>
-                        name="keyword"
-                        rules={[{ required: true, message: 'Please input your username!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label={null}>
-                        <Button type="primary" htmlType="submit">
-                            Submit
-                        </Button>
-                    </Form.Item> */}
+
 
                     <div className={styles.inputWrapper}>
-                        <div className={styles.innerInputWrapper}>
-                            <Form.Item<FieldType> noStyle name="keyword">
-                                <TextArea rows={2} placeholder="输入提示词" className={styles.customTextarea} style={{ height: '100%', resize: 'none' }} />
-                            </Form.Item>
-                            <div className={styles.hiddenDiv}>{keyword}</div>
-                        </div>
+                        <Form.Item<FieldType> noStyle name="keyword">
+                            <TextArea
+                                placeholder="输入提示词"
+                                className={styles.customTextarea}
+                                // 关键属性：自动调整高度，最小1行，最大6行（或不限）
+                                autoSize={{ minRows: 1, maxRows: 10 }}
+                            />
+                        </Form.Item>
 
                         <div className={styles.btnWrapper}>
                             <Form.Item noStyle>

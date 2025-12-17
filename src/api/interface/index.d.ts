@@ -11,3 +11,8 @@ interface Text {
 interface keyArr {
     [key: string]: Text[]
 }
+
+interface chatData {
+    role: string,
+    content: string
+}
