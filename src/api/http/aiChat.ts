@@ -35,7 +35,7 @@ const getStreamData = async (
                 model: LLMType,
                 messages: messages,
                 stream: true,
-                temperature: 0.6 // R1 建议温度不要太高
+                temperature: 0.6 // 回复的随机性
             })
         });
 

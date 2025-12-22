@@ -12,7 +12,10 @@ interface ChatData {
     content: string;
     reason: string;
 }
-
+interface sendChatData {
+    role: ChatRole;
+    content: string;
+}
 export default function ChatLayout() {
     type FieldType = {
         prompt?: string;
@@ -48,23 +51,32 @@ export default function ChatLayout() {
         const userPrompt = values.prompt;
 
         // 1. 先构建新的历史记录（包含用户的这一条）
-        const newHistory: ChatData[] = [
+        const newHistory: sendChatData[] = [
+            ...chatDatas.map((item) => {
+                return {
+                    role: item.role,
+                    content: item.content.replace(/\n/g, ''),
+                }
+            }),
+            { role: "user", content: userPrompt }
+        ];
+        const newHistoryWithoutReason: ChatData[] = [
             ...chatDatas,
             { role: "user", content: userPrompt, reason: "" }
         ];
-
         // 2. 更新 UI 显示用户提问
-        setChatDatas(newHistory);
+        setChatDatas(newHistoryWithoutReason);
         form.resetFields();
-
         // 3. 发送请求
         send(newHistory);
+
+
     };
 
-    const send = (history: ChatData[]) => {
+    const send = (history: sendChatData[]) => {
         console.log("🚀 开始请求...");
+        console.log(history);
         setLoading(true);
-
         // 重置 Ref 和当前流状态
         streamContentRef.current = { role: 'assistant', content: '', reason: '' };
         setStreamingChat({ role: 'assistant', content: '', reason: '' });
@@ -118,12 +130,12 @@ export default function ChatLayout() {
             <div className={styles.chat}>
                 {/* 渲染历史记录 */}
                 {chatDatas.map((item, index) => (
-                    <SingleChat chatData={item} isEnd={true} key={index} />
+                    <SingleChat chatData={item} isEnd={true} onFinish={onFinish} key={index} />
                 ))}
 
                 {/* 渲染正在流式生成的内容 */}
                 {streamingChat && (
-                    <SingleChat chatData={streamingChat} isEnd={false} />
+                    <SingleChat chatData={streamingChat} isEnd={false} onFinish={onFinish} />
                 )}
 
                 {/* 滚动锚点 */}

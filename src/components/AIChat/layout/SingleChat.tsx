@@ -1,8 +1,6 @@
-import { Button, Collapse, Form, Input, Tooltip, type CollapseProps, type FormProps } from 'antd'
+import { App, Button, Collapse, Form, Input, message, Tooltip, } from 'antd'
 import styles from './SingleChat.module.less'
-import { CopyOutlined, DownOutlined, LikeOutlined, LoadingOutlined, RedoOutlined, UploadOutlined, UpOutlined } from '@ant-design/icons';
-import getStreamData from '../../../api/http/aiChat';
-import { useEffect, useState } from 'react';
+import { CopyOutlined, DownOutlined, LikeOutlined, LoadingOutlined, RedoOutlined, UpOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -11,21 +9,25 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 interface prop {
     chatData: chatData,
     isEnd: boolean,
+    onFinish: (obj: { [key: string]: any }) => void
 }
 export default function SingleChat(prop: prop) {//这个组件只渲染一个对话
-
+    const { message } = App.useApp();
     const collapseItem = [{
         key: '1',
         label: `展开思考`, // 引用 useState 变量
         children: <div>{prop.chatData.reason}</div>,
-    }]
-    // setCollapseItem();
+    }];
 
-
-    // const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
-    //     console.log('Failed:', errorInfo);
-    // };
-
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(prop.chatData.content);
+            message.success("复制成功");
+            // 2秒后重置状态
+        } catch (err) {
+            console.error('复制失败:', err);
+        }
+    };
     return <>
         <div className={styles.center}>
             {(prop.chatData.content && prop.chatData.role == 'user') && <div className={styles.prompt}>{prop.chatData.content}</div>}
@@ -76,8 +78,8 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
                     <Tooltip title="redo" zIndex={999999} placement="bottom">
                         <Button shape="circle" icon={<RedoOutlined />} />
                     </Tooltip>
-                    <Tooltip title="search" zIndex={999999} placement="bottom">
-                        <Button shape="circle" icon={<CopyOutlined />} />
+                    <Tooltip title="copy" zIndex={999999} placement="bottom">
+                        <Button shape="circle" icon={<CopyOutlined />} onClick={copy} />
                     </Tooltip>
                 </div>
 
