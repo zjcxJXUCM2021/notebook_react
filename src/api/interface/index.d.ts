@@ -13,8 +13,9 @@ interface keyArr {
 }
 
 interface chatData {
-    role: string,
-    content: string
+    role: 'system' | 'user' | 'assistant',
+    content: string,
+    reason: string,
 }
 
 declare module 'react-syntax-highlighter';

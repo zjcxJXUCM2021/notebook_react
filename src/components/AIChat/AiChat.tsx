@@ -3,8 +3,8 @@ import styles from './AiChat.module.less'
 import { Button, FloatButton, Menu, type MenuProps } from 'antd';
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '../icon/Icon';
-import AIContentLayout from './layout/AIContentLayout';
 import Sider from 'antd/es/layout/Sider';
+import ChatLayout from './layout/AIChatMain/ChatLayout';
 
 interface Pos {
     nowX: number,
@@ -132,7 +132,6 @@ export default function AiChat() {
                 '--origin-y': `${transformOrigin.y}px`,
             } as React.CSSProperties}
         >
-
             <div className={styles.twoColumn}>
                 <div className={styles.left}>
                     <Sider
@@ -164,7 +163,8 @@ export default function AiChat() {
                         </Button>AI 助手 (拖拽移动)
                     </div>
                     <div className={styles.content}>
-                        <AIContentLayout></AIContentLayout>
+                        {/* <SingleChat></SingleChat> */}
+                        <ChatLayout></ChatLayout>
                     </div>
 
                     <div className={styles.footer}>
