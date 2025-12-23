@@ -1,6 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
 import useUserStore from "../../store/user";
+import { useAiChatStore } from "../../store/aiCHAT";
 interface response<T> {
     code: number,
     message: string,
@@ -182,4 +183,16 @@ export const getTags = async (): Promise<string[]> => {
 
 export const getInfo = async (): Promise<loginRes> => {
     return await http.post('/admin/renewAccessToken/');
+}
+
+// 修改后的前端代码
+export const uploadAiChatData = async (chatData: chatData): Promise<string> => {
+    return await http.post('/chat/add/', {
+        // 直接发送平铺的数据
+        parentId: useAiChatStore.getState().parentId,
+        sessionId: useAiChatStore.getState().sessionId,
+        role: chatData.role,
+        content: chatData.content,
+        reasoningContent: chatData.reason,
+    });
 }

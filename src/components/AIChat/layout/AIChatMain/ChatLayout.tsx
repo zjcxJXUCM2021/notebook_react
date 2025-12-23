@@ -1,9 +1,11 @@
 import { UploadOutlined, SendOutlined } from '@ant-design/icons';
 import styles from './ChatLayout.module.less';
-import { Button, Form, Input, type FormProps, message } from 'antd';
+import { Button, Form, Input, type FormProps, App } from 'antd';
 import SingleChat from '../SingleChat';
 import { useEffect, useState, useRef } from 'react';
 import getStreamData from '../../../../api/http/aiChat';
+import { uploadAiChatData } from '../../../../api/http/api';
+import { useAiChatStore } from '../../../../store/aiCHAT';
 
 // 定义类型 (建议移到单独的 type 文件)
 type ChatRole = 'system' | 'user' | 'assistant';
@@ -17,13 +19,14 @@ interface sendChatData {
     content: string;
 }
 export default function ChatLayout() {
+
     type FieldType = {
         prompt?: string;
     };
-
+    const { message } = App.useApp();
     const { TextArea } = Input;
     const [form] = Form.useForm();
-
+    const aiChatStore = useAiChatStore();
     // 历史对话记录
     const [chatDatas, setChatDatas] = useState<ChatData[]>([]);
     // 当前正在流式生成的对话
@@ -45,11 +48,13 @@ export default function ChatLayout() {
         scrollToBottom();
     }, [chatDatas, streamingChat]); // 数据变化时滚动
 
-    const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
+    const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         if (!values.prompt?.trim()) return;
 
         const userPrompt = values.prompt;
-
+        await uploadAiChatData({
+            role: "user", content: userPrompt, reason: ""
+        });
         // 1. 先构建新的历史记录（包含用户的这一条）
         const newHistory: sendChatData[] = [
             ...chatDatas.map((item) => {
@@ -60,12 +65,13 @@ export default function ChatLayout() {
             }),
             { role: "user", content: userPrompt }
         ];
-        const newHistoryWithoutReason: ChatData[] = [
+        const newHistoryWithoutReason: ChatData[] = [//发的是去除了推理的消息
             ...chatDatas,
             { role: "user", content: userPrompt, reason: "" }
         ];
         // 2. 更新 UI 显示用户提问
         setChatDatas(newHistoryWithoutReason);
+        aiChatStore.increaseParentId();
         form.resetFields();
         // 3. 发送请求
         send(newHistory);
@@ -93,18 +99,18 @@ export default function ChatLayout() {
                     // 处理正文
                     streamContentRef.current.content += (token.content || '');
                 }
-
                 // 更新 State (用于触发 UI 渲染)
                 // 注意：这里直接用 Ref 的值更新 State，避免了复杂的 prev 计算
                 setStreamingChat({ ...streamContentRef.current });
             },
-            () => {
+            async () => {
                 console.log("\n✅ 生成结束");
                 // --- 成功回调 ---
                 // 关键修复：从 Ref 中读取最终结果，而不是从 stale 的 state 中读取
                 const finalReply = streamContentRef.current;
-
                 setChatDatas(prev => [...prev, finalReply]);
+                await uploadAiChatData(finalReply);
+                aiChatStore.increaseParentId();
                 setStreamingChat(null); // 清除流状态
                 setLoading(false);
             },

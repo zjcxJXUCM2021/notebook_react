@@ -5,6 +5,7 @@ import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design
 import Icon from '../icon/Icon';
 import Sider from 'antd/es/layout/Sider';
 import ChatLayout from './layout/AIChatMain/ChatLayout';
+import { useAiChatStore } from '../../store/aiCHAT';
 
 interface Pos {
     nowX: number,
@@ -17,6 +18,8 @@ interface Size {
 }
 type MenuItem = Required<MenuProps>['items'][number];
 export default function AiChat() {
+    const aiChatStore = useAiChatStore();
+
     // 1. 位置状态
     let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 350, nowY: 100 });
     // 2. 【新增】尺寸状态 (默认 300x400)
@@ -89,12 +92,16 @@ export default function AiChat() {
 
     // --- 显隐逻辑 ---
     const toggleShow = (e: React.MouseEvent<HTMLElement>) => {
+
         if (!isShow) {
             const originX = e.clientX - pos.nowX;
             const originY = e.clientY - pos.nowY;
             setTransformOrigin({ x: originX, y: originY });
+            aiChatStore.init();
         }
         setIsShow(!isShow);
+
+
     }
 
     const toggleCollapsed = () => {
