@@ -1,6 +1,6 @@
 import useUserStore from "../../store/user";
 
-// // 定义回调数据的接口
+// // // 定义回调数据的接口
 interface StreamUpdate {
     content: string;   // 最终回答的片段
     reasoning: string; // 思考过程的片段
@@ -24,8 +24,7 @@ interface StreamUpdate {
 //     const API_KEY = "sk-wstsseszxmaatoaufgueuaevvlaqwopaxsliruurquuiflap";
 //     const URL = "https://api.siliconflow.cn/v1/chat/completions";
 //     // DeepSeek R1 模型名称
-//     const LLMType = 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B';
-
+//     const LLMType = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-14B';
 //     try {
 //         const res = await fetch(URL, {
 //             method: "post",
@@ -40,7 +39,7 @@ interface StreamUpdate {
 //                 temperature: 0.6 // 回复的随机性
 //             })
 //         });
-
+//         console.log(res);
 //         if (!res.ok) {
 //             const errorText = await res.text();
 //             throw new Error(`HTTP Error ${res.status}: ${errorText}`);
@@ -119,6 +118,7 @@ const getStreamData = async (
     // 假设后端运行在 localhost:8080
     const URL = `${import.meta.env.VITE_BASE_URL}/api/chat/stream`;
     const accessTokentoken = useUserStore.getState().accessToken;
+    console.log(URL);
     try {
         const res = await fetch(URL, {
             method: "post",
@@ -131,7 +131,7 @@ const getStreamData = async (
                 messages: messages // 直接发给后端
             })
         });
-
+        console.log(res);
         if (!res.ok) {
             throw new Error(`HTTP Error ${res.status}`);
         }
@@ -145,7 +145,7 @@ const getStreamData = async (
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-
+            console.log("这里");
             const chunk = decoder.decode(value, { stream: true });
             buffer += chunk;
 
@@ -182,6 +182,7 @@ const getStreamData = async (
         if (onDone) onDone();
 
     } catch (error) {
+        console.log(error);
         if (onError) onError(error as Error);
     }
 }
