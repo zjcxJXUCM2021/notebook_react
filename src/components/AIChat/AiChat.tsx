@@ -17,7 +17,6 @@ interface Size {
     width: number,
     height: number,
 }
-type MenuItem = Required<MenuProps>['items'][number];
 export default function AiChat() {
     const aiChatStore = useAiChatStore();
 
@@ -31,6 +30,7 @@ export default function AiChat() {
 
     const [collapsed, setCollapsed] = useState(false);
 
+    const [chatDatas, setChatDatas] = useState<chatData[]>([]);
     const dragOffset = useRef({ x: 0, y: 0 });
 
     const handleMove = (e: MouseEvent) => {
@@ -101,24 +101,15 @@ export default function AiChat() {
             aiChatStore.init();
         }
         setIsShow(!isShow);
-
-
     }
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
     };
-
-    const items: MenuItem[] = [
-        {
-            key: 'grp',
-            type: 'group',
-            children: [
-                { key: '13', label: 'Option 13' },
-                { key: '14', label: 'Option 14' },
-            ],
-        },
-    ];
+    const getHistory = (chatDatas: chatData[]) => {
+        console.log(chatDatas, "这里");
+        setChatDatas(chatDatas);
+    }
 
     return <>
         <FloatButton
@@ -152,7 +143,7 @@ export default function AiChat() {
                         // 可选：设置 0 宽度的触发器样式，或者直接隐藏自带 trigger 使用自定义按钮
                         zeroWidthTriggerStyle={{ top: '10px' }}
                     >
-                        <AiSiderMenu collapsed={collapsed}></AiSiderMenu>
+                        <AiSiderMenu collapsed={collapsed} getHistory={getHistory}></AiSiderMenu>
                     </Sider>
 
                 </div>
@@ -163,8 +154,7 @@ export default function AiChat() {
                         </Button>AI 助手 (拖拽移动)
                     </div>
                     <div className={styles.content}>
-                        {/* <SingleChat></SingleChat> */}
-                        <ChatLayout></ChatLayout>
+                        <ChatLayout chatDatas={chatDatas}></ChatLayout>
                     </div>
 
                     <div className={styles.footer}>

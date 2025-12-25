@@ -197,6 +197,11 @@ export const uploadAiChatData = async (chatData: chatData): Promise<string> => {
     });
 }
 
-export const getUserSessionList = async (): Promise<sessionList[]> => {
+export const getUserSessionList = async (): Promise<session[]> => {
     return await http.post("/session/getList/");
+}
+export const getSessionHistory = async (sessionId: string): Promise<chatData[]> => {
+    return await http.post('/session/getHistory/', {
+        sessionId: sessionId
+    })
 }

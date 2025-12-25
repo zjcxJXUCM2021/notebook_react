@@ -18,7 +18,10 @@ interface sendChatData {
     role: ChatRole;
     content: string;
 }
-export default function ChatLayout() {
+interface chatHistory {
+    chatDatas: chatData[]
+}
+export default function ChatLayout(prop: chatHistory) {
 
     type FieldType = {
         prompt?: string;
@@ -47,6 +50,11 @@ export default function ChatLayout() {
     useEffect(() => {
         scrollToBottom();
     }, [chatDatas, streamingChat]); // 数据变化时滚动
+
+    useEffect(() => {
+        setChatDatas(prop.chatDatas);
+        console.log("哈基米");
+    }, [prop.chatDatas])
 
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         if (!values.prompt?.trim()) return;
@@ -80,8 +88,6 @@ export default function ChatLayout() {
     };
 
     const send = (history: sendChatData[]) => {
-        console.log("🚀 开始请求...");
-        console.log(history);
         setLoading(true);
         // 重置 Ref 和当前流状态
         streamContentRef.current = { role: 'assistant', content: '', reason: '' };
