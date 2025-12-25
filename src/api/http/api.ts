@@ -1,7 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
 import useUserStore from "../../store/user";
-import { useAiChatStore } from "../../store/aiCHAT";
+import { useAiChatStore } from "../../store/aiChatStore";
 interface response<T> {
     code: number,
     message: string,
@@ -195,4 +195,8 @@ export const uploadAiChatData = async (chatData: chatData): Promise<string> => {
         content: chatData.content,
         reasoningContent: chatData.reason,
     });
+}
+
+export const getUserSessionList = async (): Promise<sessionList[]> => {
+    return await http.post("/session/getList/");
 }

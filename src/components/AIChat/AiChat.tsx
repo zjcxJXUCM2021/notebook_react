@@ -5,7 +5,8 @@ import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design
 import Icon from '../icon/Icon';
 import Sider from 'antd/es/layout/Sider';
 import ChatLayout from './layout/AIChatMain/ChatLayout';
-import { useAiChatStore } from '../../store/aiCHAT';
+import { useAiChatStore } from '../../store/aiChatStore';
+import AiSiderMenu from './layout/menu/AiSiderMenu';
 
 interface Pos {
     nowX: number,
@@ -151,15 +152,7 @@ export default function AiChat() {
                         // 可选：设置 0 宽度的触发器样式，或者直接隐藏自带 trigger 使用自定义按钮
                         zeroWidthTriggerStyle={{ top: '10px' }}
                     >
-                        <Menu
-                            // onClick={onClick}
-                            style={{ height: "100%" }}
-                            defaultSelectedKeys={['1']}
-                            defaultOpenKeys={['sub1']}
-                            mode="inline"
-                            items={items}
-                            inlineCollapsed={collapsed}
-                        />
+                        <AiSiderMenu collapsed={collapsed}></AiSiderMenu>
                     </Sider>
 
                 </div>

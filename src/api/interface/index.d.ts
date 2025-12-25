@@ -17,6 +17,10 @@ interface chatData {
     content: string,
     reason: string,
 }
+interface sessionList {
+    sessionId: string,
+    title: string,
+}
 
 declare module 'react-syntax-highlighter';
 

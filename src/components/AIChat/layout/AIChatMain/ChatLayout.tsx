@@ -5,7 +5,7 @@ import SingleChat from '../SingleChat';
 import { useEffect, useState, useRef } from 'react';
 import getStreamData from '../../../../api/http/aiChat';
 import { uploadAiChatData } from '../../../../api/http/api';
-import { useAiChatStore } from '../../../../store/aiCHAT';
+import { useAiChatStore } from '../../../../store/aiChatStore';
 
 // 定义类型 (建议移到单独的 type 文件)
 type ChatRole = 'system' | 'user' | 'assistant';
