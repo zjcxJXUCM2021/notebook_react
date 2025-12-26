@@ -12,7 +12,9 @@ export function GlobalStyle() {
       --color-overlay-color:${token.colorBgSpotlight};
       --color-border:${token.colorBorderSecondary};
       --box-shadow:${token.boxShadowSecondary};
-      --color-bg-elevated:${token.colorBgElevated}
+      --color-bg-elevated:${token.colorBgElevated};
+      --color-text-quaternary:${token.colorTextQuaternary};
+      --color-text-Tertiary:${token.colorTextTertiary};
     }
     html, body, #root {
       background-color: var(--color-bg-layout);

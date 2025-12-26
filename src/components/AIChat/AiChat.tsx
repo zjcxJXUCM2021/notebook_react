@@ -107,7 +107,6 @@ export default function AiChat() {
         setCollapsed(!collapsed);
     };
     const getHistory = (chatDatas: chatData[]) => {
-        console.log(chatDatas, "这里");
         setChatDatas(chatDatas);
     }
 
@@ -119,7 +118,7 @@ export default function AiChat() {
             onClick={toggleShow}
         />
         <div
-            className={`${styles.wrapper} ${isShow ? styles.show : ''}`}
+            className={` ${isShow ? styles.show : ''} aiChatWrapper`}
             style={{
                 top: pos.nowY,
                 left: pos.nowX,
@@ -151,7 +150,7 @@ export default function AiChat() {
                     <div className={styles.title} onMouseDown={handleMouseDown} >
                         <Button type="primary" onClick={toggleCollapsed}>
                             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                        </Button>AI 助手 (拖拽移动)
+                        </Button>AI 助手
                     </div>
                     <div className={styles.content}>
                         <ChatLayout chatDatas={chatDatas}></ChatLayout>

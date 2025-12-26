@@ -43,7 +43,7 @@ function App() {
 
       <ConfigProvider theme={themeConfig}>
         <GlobalStyle></GlobalStyle>
-        <AiChat></AiChat>
+        {UserStore.role && <AiChat></AiChat>}
         <RouterProvider router={router} />
       </ConfigProvider>
 

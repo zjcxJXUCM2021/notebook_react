@@ -193,7 +193,7 @@ export const uploadAiChatData = async (chatData: chatData): Promise<string> => {
         sessionId: useAiChatStore.getState().sessionId,
         role: chatData.role,
         content: chatData.content,
-        reasoningContent: chatData.reason,
+        reasoningContent: chatData.reasoningContent,
     });
 }
 

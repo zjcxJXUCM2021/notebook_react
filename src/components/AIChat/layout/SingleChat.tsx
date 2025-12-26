@@ -5,8 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { uploadAiChatData } from '../../../api/http/api';
-import { useEffect } from 'react';
 
 interface prop {
     chatData: chatData,
@@ -18,7 +16,7 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
     const collapseItem = [{
         key: '1',
         label: `展开思考`, // 引用 useState 变量
-        children: <div>{prop.chatData.reason}</div>,
+        children: <div>{prop.chatData.reasoningContent}</div>,
     }];
 
     const copy = async () => {
@@ -39,14 +37,13 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
             console.error('复制失败:', err);
         }
     };
+
+
     return <>
         <div className={styles.center}>
             {(prop.chatData.content && prop.chatData.role == 'user') && <>
                 <div className={styles.prompt}>{prop.chatData.content}</div>
                 <div className={styles.promptBtn}>
-                    <Tooltip title="redo" zIndex={999999} placement="bottom">
-                        <Button shape="circle" icon={<RedoOutlined />} />
-                    </Tooltip>
                     <Tooltip title="copy" zIndex={999999} placement="bottom">
                         <Button shape="circle" icon={<CopyOutlined />} onClick={copyPrompt} />
                     </Tooltip>
@@ -56,7 +53,7 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
             {
                 (prop.chatData.role == 'assistant') && <>
                     <div className={styles.thinking}>
-                        {prop.chatData.reason ? <Collapse className={styles.collapseCustom} items={collapseItem} ghost expandIcon={({ isActive }) => prop.isEnd ? (isActive ? <DownOutlined /> : <UpOutlined />) : <LoadingOutlined />} /> : ''}
+                        {prop.chatData.reasoningContent ? <Collapse className={styles.collapseCustom} items={collapseItem} ghost expandIcon={({ isActive }) => prop.isEnd ? (isActive ? <DownOutlined /> : <UpOutlined />) : <LoadingOutlined />} /> : ''}
                     </div>
                     <div className={styles.content}>
                         <ReactMarkdown
@@ -94,9 +91,6 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
             {
                 (prop.chatData.role == 'assistant' && prop.isEnd) &&
                 <div className={styles.endBtn}>
-                    <Tooltip title="like" zIndex={999999} placement="bottom">
-                        <Button shape="circle" icon={<LikeOutlined />} />
-                    </Tooltip>
                     <Tooltip title="redo" zIndex={999999} placement="bottom">
                         <Button shape="circle" icon={<RedoOutlined />} />
                     </Tooltip>
