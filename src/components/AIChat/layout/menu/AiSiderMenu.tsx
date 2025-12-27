@@ -71,7 +71,7 @@ export default function AiSiderMenu(prop: AiSiderMenuProp) {
                 key: 'grp',
                 type: 'group' as const,
                 children: [
-                    { key: '13', label: '新对话' },
+                    { key: '1', label: '新对话' },//点击之后不显示流式输出，streamId和sessionId不一样就不显示
                 ],
             }, ResData]
         }
@@ -79,9 +79,16 @@ export default function AiSiderMenu(prop: AiSiderMenuProp) {
 
     const cilckSession: MenuProps['onClick'] = async ({ key }) => {
         try {
-            const res = await getSessionHistory(key);
-            AiChatStore.setSessionId(key);
-            prop.getHistory(res);
+            if (key == '1') {
+                AiChatStore.init();
+                prop.getHistory([]);
+            }
+            else {
+                const res = await getSessionHistory(key);
+                AiChatStore.setSessionId(key);
+                prop.getHistory(res);
+            }
+
         } catch {
 
         }

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import getStreamData from "../api/http/aiChat";
+import { uploadAiChatData } from "../api/http/api";
 
 type singleRequest = {
     chatData: chatData[]; // 这里的 chatData 应该是一个数组属性
@@ -46,15 +47,18 @@ const send = (history: chatData[], sessionId: string, streamEnd: (sessionId: str
             // 注意：这里直接用 Ref 的值更新 State，避免了复杂的 prev 计算
         },
         async () => {
-            console.log("\n✅ 生成结束");
-            useAiChatStore.setState({
+            streamEnd(sessionId);
+            await uploadAiChatData(useAiChatStore.getState().replyBuffer, useAiChatStore.getState().isStream);
+
+            useAiChatStore.setState((state) => ({
                 replyBuffer: {
                     role: 'assistant',
                     content: '',
                     reasoningContent: ''
-                }
-            });
-            streamEnd(sessionId);
+                },
+                isStream: "",
+                requestList: state.requestList.slice(1)
+            }));
             // --- 成功回调 ---
             // 关键修复：从 Ref 中读取最终结果，而不是从 stale 的 state 中读取
             // setChatDatas(prev => [...prev, finalReply]);
@@ -87,7 +91,8 @@ export const useAiChatStore = create<nowChat>((set) => ({
         return result;
     },
     getReply: (history: chatData[], sessionId: string, streamEnd) => {
-        set((state) => ({ isStream: sessionId, requestList: state.requestList.slice(1) }));
+        console.log(sessionId, "当前会话");
+        set(() => ({ isStream: sessionId }));
         send(history, sessionId, streamEnd);
     },
     increaseParentId: () => set((state) => ({ parentId: state.parentId + 1 })),

@@ -40,29 +40,29 @@ export default function ChatLayout(prop: chatHistory) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const streamEnd = (sessionId: string) => {
-        console.log("这里");
+    const streamEnd = async (sessionId: string) => {
+        const finalReply = { ...streamContentRef.current };
+        console.log("结束时的完整数据:", finalReply); // 此时应该有值了
         if (sessionId == aiChatStore.sessionId) {
             setLoading(false);
-            const finalReply = { ...streamContentRef.current };
-            console.log("结束时的完整数据:", finalReply); // 此时应该有值了
             // 2. 将快照存入历史记录
             setChatDatas(prev => [...prev, finalReply]);
             streamContentRef.current = { role: 'assistant', content: '', reasoningContent: '' };
             setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
         }
-
     }
     useEffect(() => {
         scrollToBottom();
     }, [chatDatas, streamingChat]); // 数据变化时滚动
 
     useEffect(() => {
+
         setChatDatas(prop.chatDatas as chatData[]);
     }, [prop.chatDatas]);
 
     useEffect(() => {//监听消息队列变化
-        if (aiChatStore.requestList[0]?.chatData)
+        console.log("消息队列变化:", aiChatStore.requestList);
+        if (aiChatStore.requestList[0]?.chatData && aiChatStore.isStream == '')//取出第一个消息发送
             aiChatStore.getReply(aiChatStore.requestList[0].chatData, aiChatStore.requestList[0].sessionId, streamEnd);
     }, [aiChatStore.requestList.length]);
 
@@ -79,14 +79,13 @@ export default function ChatLayout(prop: chatHistory) {
     }, [aiChatStore.replyBuffer.content, aiChatStore.replyBuffer.reasoningContent])
 
     const queryClient = useQueryClient(); // 1. 获取全局 Client 实例
+
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         if (!values.prompt?.trim()) return;
-
         const userPrompt = values.prompt;
-        console.log(userPrompt, "发送的prompt");
         await uploadAiChatData({
             role: "user", content: userPrompt, reasoningContent: ""
-        });
+        }, aiChatStore.sessionId);
         queryClient.invalidateQueries({ queryKey: ['sessionList'] });
         // 1. 先构建新的历史记录（包含用户的这一条）
         const newHistory: chatData[] = [ //显示的历史
@@ -187,7 +186,7 @@ export default function ChatLayout(prop: chatHistory) {
                 }
 
                 {/* 渲染正在流式生成的内容 */}
-                {streamingChat && (
+                {streamingChat && (aiChatStore.sessionId == aiChatStore.isStream) && (
                     <SingleChat chatData={streamingChat} isEnd={false} onFinish={onFinish} />
                 )}
 
