@@ -15,8 +15,9 @@ interface keyArr {
 interface chatData {
     role: 'system' | 'user' | 'assistant',
     content: string,
-    reasoningContent: string,
+    reasoningContent?: string,
 }
+
 interface session {
     sessionId: string,
     title: string,

@@ -1,17 +1,81 @@
 import { create } from "zustand";
+import getStreamData from "../api/http/aiChat";
 
+type singleRequest = {
+    chatData: chatData[]; // 这里的 chatData 应该是一个数组属性
+    sessionId: string;
+};
 interface nowChat {
-    sessionId: string[],
+    replyBuffer: {
+        role: 'assistant',
+        content: string,
+        reasoningContent: string
+    },
+    requestList: singleRequest[],
+    isStream: string,
+    sessionId: string,
     parentId: number,
     init: () => string,
+    getReply: (history: chatData[], sessionId: string, streamEnd: (sessionId: string) => void) => void,
     resetParentId: () => void,
     increaseParentId: () => void,
     setSessionId: (sessionId: string) => void,
     setParentId: (parentId: number) => void,
 }
 
+const send = (history: chatData[], sessionId: string, streamEnd: (sessionId: string) => void) => {
+    // 重置 Ref 和当前流状态
+    console.log(history, "发送的数据");
+    getStreamData(
+        history,
+        (token: any) => {
+            // --- 更新逻辑 ---
+            // 更新 Ref (用于逻辑真值)
+            useAiChatStore.setState((state) => {
+                const newBuffer = { ...state.replyBuffer };
+                // 你的逻辑：content为空时是思考过程(reasoning)，否则是正文
+                // 注意：请确保你的API返回结构真的是这样。通常 reasoning 在 token.reasoning 字段。
+                if (token.content === '' || !token.content) {
+                    newBuffer.reasoningContent += (token.reasoning || '');
+                } else {
+                    newBuffer.content += (token.content || '');
+                }
+                return { replyBuffer: newBuffer };
+            });
+            // 更新 State (用于触发 UI 渲染)
+            // 注意：这里直接用 Ref 的值更新 State，避免了复杂的 prev 计算
+        },
+        async () => {
+            console.log("\n✅ 生成结束");
+            useAiChatStore.setState({
+                replyBuffer: {
+                    role: 'assistant',
+                    content: '',
+                    reasoningContent: ''
+                }
+            });
+            streamEnd(sessionId);
+            // --- 成功回调 ---
+            // 关键修复：从 Ref 中读取最终结果，而不是从 stale 的 state 中读取
+            // setChatDatas(prev => [...prev, finalReply]);
+            // await uploadAiChatData(finalReply);
+        },
+        (err: any) => {
+            console.error("❌ 发生错误:", err);
+        }
+    );
+};
+
 export const useAiChatStore = create<nowChat>((set) => ({
-    sessionId: [''],
+    replyBuffer: {
+        role: 'assistant',
+        content: "",
+        reasoningContent: "",
+    },//在加入返回元素时是加入到这里
+    requestList: [],//消息队列，页面中监听，如果变化了就取出一个发送消息
+    isStream: '',//sessionId,为哪个sessionId哪个就接受/从store中搬出数据,现在正在流式传输的会话
+    replyList: [],
+    sessionId: '',//当前的会话id
     parentId: 0,
     init: () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -19,13 +83,15 @@ export const useAiChatStore = create<nowChat>((set) => ({
         for (let i = 0; i < 20; i++) {
             result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-
-        set({ sessionId: [result], parentId: 0 });
-        console.log(result, "这里");
+        set({ sessionId: result, parentId: 0 });
         return result;
+    },
+    getReply: (history: chatData[], sessionId: string, streamEnd) => {
+        set((state) => ({ isStream: sessionId, requestList: state.requestList.slice(1) }));
+        send(history, sessionId, streamEnd);
     },
     increaseParentId: () => set((state) => ({ parentId: state.parentId + 1 })),
     resetParentId: () => set({ parentId: 0 }),
-    setSessionId: (i) => set({ sessionId: [i] }),
+    setSessionId: (i) => set({ sessionId: i }),
     setParentId: (i) => set({ parentId: i }),
 }))

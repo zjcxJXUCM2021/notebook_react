@@ -98,7 +98,6 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
                         <Button shape="circle" icon={<CopyOutlined />} onClick={copy} />
                     </Tooltip>
                 </div>
-
             }
         </div>
     </>

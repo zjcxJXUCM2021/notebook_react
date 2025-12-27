@@ -91,7 +91,7 @@ export default function AiSiderMenu(prop: AiSiderMenuProp) {
             style={{ height: "100%", overflow: "hidden", overflowY: "auto", userSelect: 'none' }}
             // defaultSelectedKeys={['1']}
             // defaultOpenKeys={['sub1']}
-            selectedKeys={[AiChatStore.sessionId[AiChatStore.sessionId.length - 1]]}
+            selectedKeys={[AiChatStore.sessionId]}
             mode="inline"
             items={res}
             inlineCollapsed={prop.collapsed}

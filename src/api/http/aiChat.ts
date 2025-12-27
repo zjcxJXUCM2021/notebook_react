@@ -118,7 +118,6 @@ const getStreamData = async (
     // 假设后端运行在 localhost:8080
     const URL = `${import.meta.env.VITE_BASE_URL}/api/chat/stream`;
     const accessTokentoken = useUserStore.getState().accessToken;
-    console.log(URL);
     try {
         const res = await fetch(URL, {
             method: "post",
@@ -131,7 +130,6 @@ const getStreamData = async (
                 messages: messages // 直接发给后端
             })
         });
-        console.log(res);
         if (!res.ok) {
             throw new Error(`HTTP Error ${res.status}`);
         }
@@ -145,7 +143,6 @@ const getStreamData = async (
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            console.log("这里");
             const chunk = decoder.decode(value, { stream: true });
             buffer += chunk;
 

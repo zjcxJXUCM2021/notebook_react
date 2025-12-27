@@ -9,16 +9,8 @@ import { useAiChatStore } from '../../../../store/aiChatStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 // 定义类型 (建议移到单独的 type 文件)
-type ChatRole = 'system' | 'user' | 'assistant';
-interface ChatData {
-    role: ChatRole;
-    content: string;
-    reasoningContent: string;
-}
-interface sendChatData {
-    role: ChatRole;
-    content: string;
-}
+
+
 interface chatHistory {
     chatDatas: chatData[]
 }
@@ -32,14 +24,14 @@ export default function ChatLayout(prop: chatHistory) {
     const [form] = Form.useForm();
     const aiChatStore = useAiChatStore();
     // 历史对话记录
-    const [chatDatas, setChatDatas] = useState<ChatData[]>([]);
+    const [chatDatas, setChatDatas] = useState<chatData[]>([]);
     // 当前正在流式生成的对话
-    const [streamingChat, setStreamingChat] = useState<ChatData | null>(null);
+    const [streamingChat, setStreamingChat] = useState<chatData | null>(null);
     // 是否正在生成中
     const [loading, setLoading] = useState(false);
 
     // 关键修复：使用 Ref 来追踪流式累积的内容，避免闭包陷阱
-    const streamContentRef = useRef<ChatData>({ role: 'assistant', content: '', reasoningContent: '' });
+    const streamContentRef = useRef<chatData>({ role: 'assistant', content: '', reasoningContent: '' });
     // 滚动锚点
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -48,86 +40,127 @@ export default function ChatLayout(prop: chatHistory) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const streamEnd = (sessionId: string) => {
+        console.log("这里");
+        if (sessionId == aiChatStore.sessionId) {
+            setLoading(false);
+            const finalReply = { ...streamContentRef.current };
+            console.log("结束时的完整数据:", finalReply); // 此时应该有值了
+            // 2. 将快照存入历史记录
+            setChatDatas(prev => [...prev, finalReply]);
+            streamContentRef.current = { role: 'assistant', content: '', reasoningContent: '' };
+            setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
+        }
+
+    }
     useEffect(() => {
         scrollToBottom();
     }, [chatDatas, streamingChat]); // 数据变化时滚动
 
     useEffect(() => {
-        setChatDatas(prop.chatDatas);
-    }, [prop.chatDatas])
+        setChatDatas(prop.chatDatas as chatData[]);
+    }, [prop.chatDatas]);
+
+    useEffect(() => {//监听消息队列变化
+        if (aiChatStore.requestList[0]?.chatData)
+            aiChatStore.getReply(aiChatStore.requestList[0].chatData, aiChatStore.requestList[0].sessionId, streamEnd);
+    }, [aiChatStore.requestList.length]);
+
+    useEffect(() => {
+        if (aiChatStore.sessionId == aiChatStore.isStream) {
+            // console.log(aiChatStore.replyBuffer);
+            streamContentRef.current = {
+                role: 'assistant',
+                content: aiChatStore.replyBuffer.content,
+                reasoningContent: aiChatStore.replyBuffer.reasoningContent
+            };
+        }
+        setStreamingChat(aiChatStore.replyBuffer);
+    }, [aiChatStore.replyBuffer.content, aiChatStore.replyBuffer.reasoningContent])
+
     const queryClient = useQueryClient(); // 1. 获取全局 Client 实例
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         if (!values.prompt?.trim()) return;
 
         const userPrompt = values.prompt;
+        console.log(userPrompt, "发送的prompt");
         await uploadAiChatData({
             role: "user", content: userPrompt, reasoningContent: ""
         });
         queryClient.invalidateQueries({ queryKey: ['sessionList'] });
         // 1. 先构建新的历史记录（包含用户的这一条）
-        const newHistory: sendChatData[] = [
+        const newHistory: chatData[] = [ //显示的历史
             ...chatDatas.map((item) => {
                 return {
                     role: item.role,
                     content: item.content.replace(/\n/g, ''),
+                    reasoningContent: item.reasoningContent,
                 }
             }),
-            { role: "user", content: userPrompt }
+            { role: "user", content: userPrompt, reasoningContent: "" }
         ];
-        const newHistoryWithoutReason: ChatData[] = [//发的是去除了推理的消息
+
+        const newHistoryWithoutReason: chatData[] = [//发的是去除了推理的消息
             ...chatDatas,
             { role: "user", content: userPrompt, reasoningContent: "" }
         ];
-        // 2. 更新 UI 显示用户提问
-        setChatDatas(newHistoryWithoutReason);
-        aiChatStore.increaseParentId();
+        setChatDatas(newHistory);
         form.resetFields();
-        // 3. 发送请求
-        send(newHistory);
+        aiChatStore.requestList.push({ chatData: newHistoryWithoutReason, sessionId: aiChatStore.sessionId });
+
+
+        // 2. 更新 UI 显示用户提问
+        // setChatDatas(newHistoryWithoutReason);
+        // aiChatStore.increaseParentId();
+        // form.resetFields();
+        // // 3. 发送请求
+        // send(newHistory);
 
     };
 
-    const send = (history: sendChatData[]) => {
-        setLoading(true);
-        // 重置 Ref 和当前流状态
-        streamContentRef.current = { role: 'assistant', content: '', reasoningContent: '' };
-        setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
+    // const send = (history: chatData[]) => {
+    //     setLoading(true);
+    //     // 重置 Ref 和当前流状态
+    //     streamContentRef.current = { role: 'assistant', content: '', reasoningContent: '' };
+    //     setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
+    //     aiChatStore.getReply(history);
+    //     setStreamingChat({ ...aiChatStore.replyBuffer });
 
-        getStreamData(
-            history,
-            (token: any) => {
-                // --- 更新逻辑 ---
-                // 更新 Ref (用于逻辑真值)
-                if (token.content === '') {
-                    // 处理 reasoning (思考过程)
-                    streamContentRef.current.reasoningContent += (token.reasoning || '');
-                } else {
-                    // 处理正文
-                    streamContentRef.current.content += (token.content || '');
-                }
-                // 更新 State (用于触发 UI 渲染)
-                // 注意：这里直接用 Ref 的值更新 State，避免了复杂的 prev 计算
-                setStreamingChat({ ...streamContentRef.current });
-            },
-            async () => {
-                console.log("\n✅ 生成结束");
-                // --- 成功回调 ---
-                // 关键修复：从 Ref 中读取最终结果，而不是从 stale 的 state 中读取
-                const finalReply = streamContentRef.current;
-                setChatDatas(prev => [...prev, finalReply]);
-                await uploadAiChatData(finalReply);
-                aiChatStore.increaseParentId();
-                setStreamingChat(null); // 清除流状态
-                setLoading(false);
-            },
-            (err: any) => {
-                console.error("❌ 发生错误:", err);
-                message.error("请求失败，请稍后重试");
-                setLoading(false);
-                setStreamingChat(null);
-            }
-        );
-    };
+    //     // getStreamData(
+    //     //     history,
+    //     //     (token: any) => {
+    //     //         // --- 更新逻辑 ---
+    //     //         // 更新 Ref (用于逻辑真值)
+    //     //         if (token.content === '') {
+    //     //             // 处理 reasoning (思考过程)
+    //     //             streamContentRef.current.reasoningContent += (token.reasoning || '');
+    //     //         } else {
+    //     //             // 处理正文
+    //     //             streamContentRef.current.content += (token.content || '');
+    //     //         }
+    //     //         // 更新 State (用于触发 UI 渲染)
+    //     //         // 注意：这里直接用 Ref 的值更新 State，避免了复杂的 prev 计算
+    //     //         setStreamingChat({ ...streamContentRef.current });
+    //     //     },
+    //     //     async () => {
+    //     //         console.log("\n✅ 生成结束");
+    //     //         // --- 成功回调 ---
+    //     //         // 关键修复：从 Ref 中读取最终结果，而不是从 stale 的 state 中读取
+    //     //         const finalReply = streamContentRef.current;
+    //     //         setChatDatas(prev => [...prev, finalReply]);
+    //     //         await uploadAiChatData(finalReply);
+    //     //         aiChatStore.increaseParentId();
+    //     //         setStreamingChat(null); // 清除流状态
+    //     //         setLoading(false);
+    //     //     },
+    //     //     (err: any) => {
+    //     //         console.error("❌ 发生错误:", err);
+    //     //         message.error("请求失败，请稍后重试");
+    //     //         setLoading(false);
+    //     //         setStreamingChat(null);
+    //     //     }
+    //     // );
+    // };
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // 支持回车发送，Shift+Enter 换行
