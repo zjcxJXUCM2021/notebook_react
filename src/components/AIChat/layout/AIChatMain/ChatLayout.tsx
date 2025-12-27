@@ -1,4 +1,4 @@
-import { UploadOutlined, SendOutlined } from '@ant-design/icons';
+import { UploadOutlined, SendOutlined, LoadingOutlined } from '@ant-design/icons';
 import styles from './ChatLayout.module.less';
 import { Button, Form, Input, type FormProps, App } from 'antd';
 import SingleChat from '../SingleChat';
@@ -24,7 +24,7 @@ export default function ChatLayout(prop: chatHistory) {
     const [form] = Form.useForm();
     const aiChatStore = useAiChatStore();
     // 历史对话记录
-    const [chatDatas, setChatDatas] = useState<chatData[]>([]);
+    const [chatDatas, setChatDatas] = useState<chatData[]>([]);//当前非流式的对话
     // 当前正在流式生成的对话
     const [streamingChat, setStreamingChat] = useState<chatData | null>(null);
     // 是否正在生成中
@@ -41,9 +41,14 @@ export default function ChatLayout(prop: chatHistory) {
     };
 
     const streamEnd = async (sessionId: string) => {
-        const finalReply = { ...streamContentRef.current };
+        const finalReply = {
+            ...streamContentRef.current
+        }
+        // 如果 reasoningContent 本身在 chatData 定义里是可选的，直接传即可};
         console.log("结束时的完整数据:", finalReply); // 此时应该有值了
-        if (sessionId == aiChatStore.sessionId) {
+
+        if (sessionId == aiChatStore.sessionId) {//显示流式输出时，存储信息
+            console.log(finalReply, "finalReply");
             setLoading(false);
             // 2. 将快照存入历史记录
             setChatDatas(prev => [...prev, finalReply]);
@@ -51,12 +56,11 @@ export default function ChatLayout(prop: chatHistory) {
             setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
         }
     }
-    useEffect(() => {
-        scrollToBottom();
-    }, [chatDatas, streamingChat]); // 数据变化时滚动
+    // useEffect(() => {
+    //     scrollToBottom();
+    // }, [chatDatas, streamingChat]); // 数据变化时滚动
 
     useEffect(() => {
-
         setChatDatas(prop.chatDatas as chatData[]);
     }, [prop.chatDatas]);
 
@@ -81,11 +85,14 @@ export default function ChatLayout(prop: chatHistory) {
     const queryClient = useQueryClient(); // 1. 获取全局 Client 实例
 
     const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+        streamContentRef.current = { role: 'assistant', content: '', reasoningContent: '' };
+        setStreamingChat({ role: 'assistant', content: '', reasoningContent: '' });
         if (!values.prompt?.trim()) return;
         const userPrompt = values.prompt;
         await uploadAiChatData({
             role: "user", content: userPrompt, reasoningContent: ""
         }, aiChatStore.sessionId);
+        aiChatStore.newQuery(aiChatStore.sessionId);//构建新的
         queryClient.invalidateQueries({ queryKey: ['sessionList'] });
         // 1. 先构建新的历史记录（包含用户的这一条）
         const newHistory: chatData[] = [ //显示的历史
@@ -186,10 +193,15 @@ export default function ChatLayout(prop: chatHistory) {
                 }
 
                 {/* 渲染正在流式生成的内容 */}
-                {streamingChat && (aiChatStore.sessionId == aiChatStore.isStream) && (
-                    <SingleChat chatData={streamingChat} isEnd={false} onFinish={onFinish} />
-                )}
-
+                {
+                    streamingChat && (aiChatStore.sessionId == aiChatStore.isStream) && (
+                        <SingleChat chatData={streamingChat} isEnd={false} onFinish={onFinish} />)
+                }
+                {
+                    aiChatStore.requestList.some((item) => item.sessionId == aiChatStore.sessionId) && aiChatStore.isStream != '' && (aiChatStore.sessionId != aiChatStore.isStream) && <div>
+                        <LoadingOutlined />等待输出中
+                    </div>
+                }
                 {/* 滚动锚点 */}
                 <div ref={messagesEndRef} style={{ height: 1 }} />
             </div>

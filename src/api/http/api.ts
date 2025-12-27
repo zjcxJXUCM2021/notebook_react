@@ -187,7 +187,6 @@ export const getInfo = async (): Promise<loginRes> => {
 
 // 修改后的前端代码
 export const uploadAiChatData = async (chatData: chatData, sessionId: string): Promise<string> => {
-    console.log(sessionId, "存储到后端");
     return await http.post('/chat/add/', {
         // 直接发送平铺的数据
         parentId: useAiChatStore.getState().parentId,

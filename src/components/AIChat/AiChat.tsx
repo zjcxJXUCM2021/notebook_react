@@ -23,7 +23,7 @@ export default function AiChat() {
     // 1. 位置状态
     let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 350, nowY: 100 });
     // 2. 【新增】尺寸状态 (默认 300x400)
-    let [size, setSize] = useState<Size>({ width: 300, height: 400 });
+    let [size, setSize] = useState<Size>({ width: 800, height: 600 });
 
     let [isShow, setIsShow] = useState(false);
     const [transformOrigin, setTransformOrigin] = useState({ x: 0, y: 0 });

@@ -89,7 +89,7 @@ export default function SingleChat(prop: prop) {//这个组件只渲染一个对
 
             }
             {
-                (prop.chatData.role == 'assistant' && prop.isEnd) &&
+                (prop.chatData.role == 'assistant' && prop.isEnd && prop.chatData.content) &&
                 <div className={styles.endBtn}>
                     <Tooltip title="redo" zIndex={999999} placement="bottom">
                         <Button shape="circle" icon={<RedoOutlined />} />
