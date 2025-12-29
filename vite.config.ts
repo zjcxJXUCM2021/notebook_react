@@ -2,8 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 // https://vite.dev/config/
-export default defineConfig(({ command }) => {
-  console.log(command);
+export default defineConfig(() => {
   return {
     envDir: './src/env',
     plugins: [react()],
@@ -17,21 +16,38 @@ export default defineConfig(({ command }) => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              return 'vendor';
-            } else if (id.includes('tinymce')) {
-              return 'tinymce'
-            } else return 'main';
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+                return 'lib-react';
+              }
+              if (id.includes('antd')) return 'lib-antd';
+              else return 'vendor';
+            }
           }
         }
       }
     },
     server: {
-      proxy: {//现在的路径等于api + 请求头
-        '/api': { // 匹配所有以 /api 开头的请求
-          target: 'http://124.221.73.180:3002', // 后端地址
-          changeOrigin: true,//把自己的源替换成target，进行代理
-          // 如果后端接口没有 /api 前缀，可以用 rewrite 去掉
-          rewrite: (path) => path.replace(/^\/api/, '')
+      proxy: {//服务器代理，防止跨域报错
+        '/api': { // 1. 拦截指令：管家，凡是看到 '/api' 开头的请求，都要拦下来处理
+
+          target: 'http://124.221.73.180:3002', // 2. 目标地址：实际的收信人是谁
+
+          changeOrigin: true, // 3. 伪装身份：非常重要！
+          // 解释：很多后端服务器会检查 "Host" 请求头。
+          // 如果设置为 false：后端看到 Host 是 localhost:5173，可能会拒绝服务（觉得你是外人）。
+          // 如果设置为 true：Vite 会把 Host 头偷偷改成 124.221.73.180:3002。
+          // 也就是管家对后端说：“我是自己人，我就是从你们那边来的。”
+
+          rewrite: (path) => path.replace(/^\/api/, ''),// 4. 路径重写：撕掉标签
+          headers: {
+            Referer: 'http://124.221.73.180:3002',
+            Origin: 'http://124.221.73.180:3002'
+          }
+          // 解释：
+          // 你发的是：/api/user
+          // 但后端真正的接口可能只是：/user
+          // 后端如果收到 /api/user 可能会报 404 找不到。
+          // 所以管家在转发前，把 '/api' 这个为了方便识别的前缀给删掉，只把 '/user' 发给后端。
         }
       }
     }

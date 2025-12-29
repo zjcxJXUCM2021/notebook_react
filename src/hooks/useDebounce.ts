@@ -1,30 +1,36 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 
+//防抖，在delay后才执行这个函数
+//这里的话会传的是一个uesCallback？
 export default function useDebounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
-    // 1. 使用 useRef 保存最新的函数
-    // 这样每次组件渲染 fn 变化时，ref.current 都会更新，保证执行的是最新的逻辑
-    const fnRef = useRef(fn);
 
-    // 2. 每次渲染都更新 ref，解决闭包陷阱
-    useEffect(() => {
+    const timerRef = useRef<number | null>(null);
+    const fnRef = useRef(fn);//useRef不会触发组件重新渲染
+    timerRef.current = setTimeout(() => {
+        fn();
+    }, delay);
+
+    useEffect(() => {// 始终保持对最新 fn 的引用，避免闭包问题
         fnRef.current = fn;
     }, [fn]);
 
-    // 3. 这里的 useRef 是为了保存定时器 ID，跨渲染持久化
-    const timerRef = useRef(1);
-
-    // 4. 返回稳定的防抖函数
-    return useCallback((...args: any[]) => {
-        // 如果有定时器，清除它
-        if (timerRef.current) {
+    const debouncedFn = useCallback((...args: Parameters<T>) => {//创建一个新的函数，把调用的参数传给他
+        if (timerRef.current !== null) {
             clearTimeout(timerRef.current);
         }
 
-        // 设置新定时器
-        timerRef.current = setTimeout(() => {
-            // 调用最新的函数逻辑
+        timerRef.current = window.setTimeout(() => {
             fnRef.current(...args);
         }, delay);
     }, [delay]);
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current !== null) {
+                clearTimeout(timerRef.current);
+            }
+        }
+    }, []);
+    return debouncedFn;
 }
