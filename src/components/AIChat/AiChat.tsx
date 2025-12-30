@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react'
 import styles from './AiChat.module.less'
-import { Button, FloatButton, Menu, type MenuProps } from 'antd';
+import { Button, FloatButton, } from 'antd';
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Icon from '../icon/Icon';
 import Sider from 'antd/es/layout/Sider';
 import ChatLayout from './layout/AIChatMain/ChatLayout';
 import { useAiChatStore } from '../../store/aiChatStore';
 import AiSiderMenu from './layout/menu/AiSiderMenu';
+import useThrottle from '../../hooks/useThrottle';
 
 interface Pos {
     nowX: number,
@@ -21,7 +22,7 @@ export default function AiChat() {
     const aiChatStore = useAiChatStore();
 
     // 1. 位置状态
-    let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 350, nowY: 100 });
+    let [pos, setPos] = useState<Pos>({ nowX: window.innerWidth - 800, nowY: 200 });
     // 2. 【新增】尺寸状态 (默认 300x400)
     let [size, setSize] = useState<Size>({ width: 800, height: 600 });
 
@@ -33,11 +34,11 @@ export default function AiChat() {
     const [chatDatas, setChatDatas] = useState<chatData[]>([]);
     const dragOffset = useRef({ x: 0, y: 0 });
 
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = useThrottle((e: MouseEvent) => {
         const newX = e.clientX - dragOffset.current.x;
         const newY = e.clientY - dragOffset.current.y;
         setPos({ nowX: newX, nowY: newY });
-    }
+    }, 16);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.button !== 0) return
@@ -58,7 +59,7 @@ export default function AiChat() {
     // --- 【新增】调整大小逻辑 (Resize) ---
     const resizeStart = useRef({ x: 0, y: 0, startW: 0, startH: 0 });
 
-    const handleResizeMove = (e: MouseEvent) => {
+    const handleResizeMove = useThrottle((e: MouseEvent) => {
         // 计算移动距离
         const dx = e.clientX - resizeStart.current.x;
         const dy = e.clientY - resizeStart.current.y;
@@ -68,7 +69,7 @@ export default function AiChat() {
             width: Math.max(300, resizeStart.current.startW + dx),
             height: Math.max(300, resizeStart.current.startH + dy)
         });
-    }
+    }, 16)
 
     const handleResizeMouseUp = () => {
         document.removeEventListener('mousemove', handleResizeMove);
@@ -93,7 +94,6 @@ export default function AiChat() {
 
     // --- 显隐逻辑 ---
     const toggleShow = (e: React.MouseEvent<HTMLElement>) => {
-
         if (!isShow) {
             const originX = e.clientX - pos.nowX;
             const originY = e.clientY - pos.nowY;
@@ -106,9 +106,10 @@ export default function AiChat() {
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
     };
+
     const getHistory = (chatDatas: chatData[]) => {
         setChatDatas(chatDatas);
-    }
+    };
 
     return <>
         <FloatButton

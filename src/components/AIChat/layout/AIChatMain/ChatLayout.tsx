@@ -1,9 +1,9 @@
 import { UploadOutlined, SendOutlined, LoadingOutlined } from '@ant-design/icons';
 import styles from './ChatLayout.module.less';
-import { Button, Form, Input, type FormProps, App } from 'antd';
+import { Button, Form, Input, type FormProps, } from 'antd';
 import SingleChat from '../SingleChat';
 import { useEffect, useState, useRef } from 'react';
-import getStreamData from '../../../../api/http/aiChat';
+
 import { uploadAiChatData } from '../../../../api/http/api';
 import { useAiChatStore } from '../../../../store/aiChatStore';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,7 +19,7 @@ export default function ChatLayout(prop: chatHistory) {
     type FieldType = {
         prompt?: string;
     };
-    const { message } = App.useApp();
+    // const { message } = App.useApp();
     const { TextArea } = Input;
     const [form] = Form.useForm();
     const aiChatStore = useAiChatStore();
@@ -36,9 +36,9 @@ export default function ChatLayout(prop: chatHistory) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // 自动滚动到底部
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    // const scrollToBottom = () => {
+    //     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // };
 
     const streamEnd = async (sessionId: string) => {
         const finalReply = {

@@ -1,11 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+import qiniu from 'vite-plugin-qiniu'; // 引入插件
 // https://vite.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const isProduction = mode === 'production';
+
   return {
     envDir: './src/env',
-    plugins: [react()],
+    base: isProduction ? 'https://redsources.jlyproject.cn/vite/' : '/',
+    plugins: [
+      react(),
+      qiniu({
+        accessKey: 'EIriimCUVKCk0G4gCFACezpYSZFvpZ6L8IvQqYUR',
+        secretKey: 'oN_nA1SkDFDOpjxf3c4gfw_LGwtEGBb9TV-yzsDE',
+        bucket: 'jlyred',
+        rootName: "vite",
+      })
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

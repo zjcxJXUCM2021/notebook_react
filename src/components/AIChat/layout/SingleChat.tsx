@@ -1,6 +1,6 @@
-import { App, Button, Collapse, Form, Input, message, Tooltip, } from 'antd'
+import { App, Button, Collapse, Tooltip, } from 'antd'
 import styles from './SingleChat.module.less'
-import { CopyOutlined, DownOutlined, LikeOutlined, LoadingOutlined, RedoOutlined, UpOutlined } from '@ant-design/icons';
+import { CopyOutlined, DownOutlined, LoadingOutlined, RedoOutlined, UpOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
