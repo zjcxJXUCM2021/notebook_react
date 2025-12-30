@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 
-//防抖，在delay后才执行这个函数
+//防抖，当持续触发事件时，一定时间内没有再触发事件，事件处理函数才会执行一次。 如果设定的时间内又触发了事件，就重新开始计时。
 //这里的话会传的是一个uesCallback？
 export default function useDebounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
 
