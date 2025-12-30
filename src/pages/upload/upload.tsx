@@ -1,22 +1,21 @@
-
 import { useEffect, useRef, useState } from 'react';
-import styles from './upload.module.less'
-import { Editor } from '@tinymce/tinymce-react'
-import { Form, Button, Input, Modal, AutoComplete, App } from 'antd';
+import styles from './upload.module.less';
+import { Editor } from '@tinymce/tinymce-react';
+import { Form, Button, Input, Modal, AutoComplete, App, Card, Row, Col, Space } from 'antd';
 import { getTags, getText, updateText, uploadText } from '../../api/http/api';
 import axios from 'axios';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router';
 import useDarkStore from '../../store/darkMode';
 
-
 interface FieldType {
-    title: string,
-    tag: string,
+    title: string;
+    tag: string;
 }
 interface searchTag {
-    value: string,
-    label: string
+    value: string;
+    label: string;
 }
+
 export default function Upload() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const editorRef = useRef<any>(null);
@@ -33,42 +32,41 @@ export default function Upload() {
     const [tags, setTags] = useState<string[]>([]);
     const [uploading, setUploading] = useState(false);
 
-    const blocker = useBlocker(//阻塞跳转上一页
+    // 路由拦截逻辑保持不变
+    const blocker = useBlocker(
         ({ historyAction }) => {
             if (historyAction !== 'POP') {
                 return false;
             }
-
             showModal();
             return true;
         }
-
     );
-    useEffect(() => {
-        document.title = "上传文档";
-        const init = async () => {
-            try {
-                const res = await getText(Number(id));
-                setContent(res.content);
-                form.setFieldsValue({
-                    title: res.title,
-                    tag: res.tag
-                });
-            } catch {
-            }
 
+    useEffect(() => {
+        document.title = id ? "编辑文档" : "上传文档"; // 优化标题逻辑
+        const init = async () => {
+            if (id) {
+                try {
+                    const res = await getText(Number(id));
+                    setContent(res.content);
+                    form.setFieldsValue({
+                        title: res.title,
+                        tag: res.tag
+                    });
+                } catch { }
+            }
             try {
                 setTags(await getTags());
-            } catch {
-
-            }
-        }
+            } catch { }
+        };
         init();
-    }, [])
+    }, [id, form]);
+
     useEffect(() => {
-        const handler = (e: any) => {//阻塞刷新
+        const handler = (e: any) => {
             e.preventDefault();
-            e.returnValue = ""; // 必须有，Chrome 要求这样才能拦截
+            e.returnValue = "";
         };
         window.addEventListener("beforeunload", handler);
         return () => {
@@ -77,50 +75,52 @@ export default function Upload() {
     }, []);
 
     const onFinish = async (value: FieldType) => {
-        if (!editorRef.current) {
+        if (!editorRef.current) return;
+
+        const currentContent = editorRef.current.getContent();
+        // 简单校验一下内容是否为空
+        if (!currentContent || currentContent.trim() === '') {
+            message.warning('请输入文章内容');
             return;
         }
-        const currentContent = editorRef.current.getContent();
+
         try {
-            message.info({ key: "upload", content: "上传中" });
-            if (!id) {
-                const res = await uploadText({
-                    id: 0,
-                    content: currentContent,
-                    title: value.title,
-                    tag: value.tag,
-                } as Text);
-                nav(`/text/${res}`);
-            } else {
-                await updateText({
-                    id: Number(id),
-                    content: currentContent,
-                    title: value.title,
-                    tag: value.tag,
-                } as Text)
-                nav(`/text/${id}`);
-            }
             setUploading(true);
-            message.success({ key: "upload", content: "上传成功", duration: 2 });
+            message.info({ key: "upload", content: "上传中" });
+            const payload = {
+                id: id ? Number(id) : 0,
+                content: currentContent,
+                title: value.title,
+                tag: value.tag,
+            } as Text; // 假设 Text 类型定义在全局或导入
 
+            let resId;
+            if (!id) {
+                resId = await uploadText(payload);
+            } else {
+                await updateText(payload);
+                resId = id;
+            }
+
+            message.success({ key: "upload", content: "保存成功", duration: 2 });
+            // 只有成功才跳转，并把 loading 状态解除
+            nav(`/text/${resId}`);
         } catch (error) {
-            message.error("上传失败");
+            setUploading(false);
+            message.error({ key: "upload", content: "保存失败" });
         }
+    };
 
-    }
     const onFinishFailed = async () => {
+        message.error("请检查必填项");
+    };
 
-    }
     const handleImageUpload = (blobInfo: any, progress: (percent: number) => void) => {
         return new Promise<string>((resolve, reject) => {
             const formData = new FormData();
-            // 注意：这里假设后端接收文件的参数名为 'file'。
-            // 如果你的后端是用 'image' 或其他名字，请把 'file' 改掉。
             formData.append('file', blobInfo.blob(), blobInfo.filename());
             axios.post('https://jlyproject.cn/api/upload/photo/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: (e) => {
                     if (e.total) {
                         progress((e.loaded / e.total) * 100);
@@ -128,158 +128,153 @@ export default function Upload() {
                 }
             }).then(response => {
                 const data = response.data.data.location;
-                // 根据后端返回格式解析图片 URL
-                // 情况1：直接返回 URL 字符串
-                if (typeof data === 'string') {
-                    resolve(data);
-                }
-                // 情况2：返回 JSON 对象 { url: "..." }
-                else if (data && data.url) {
-                    resolve(data.url);
-                }
-                // 情况3：返回 JSON 对象 { data: "..." }
-                else if (data && data.data) {
-                    resolve(data.data);
-                } else {
-                    console.error("无法解析后端返回的图片地址:", data);
-
-                }
+                if (typeof data === 'string') resolve(data);
+                else if (data && data.url) resolve(data.url);
+                else if (data && data.data) resolve(data.data);
+                else reject('无法解析图片地址');
             }).catch(err => {
-                console.error("图片上传出错:", err);
                 reject('图片上传失败: ' + (err.message || err));
             });
         });
     };
 
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-
+    const showModal = () => setIsModalOpen(true);
     const handleOk = () => {
-        blocker.proceed?.()
+        blocker.proceed?.();
         setIsModalOpen(false);
     };
-
     const handleCancel = () => {
-        blocker.reset?.()
+        blocker.reset?.();
         setIsModalOpen(false);
     };
 
-    const onSearch = async (keyword: string) => {
-        try {
-            let newOptions = tags.map((item) => ({
-                value: item, // 唯一标识，必须不重复
-                label: item  // 下拉列表中显示的文字
-            }));
-            newOptions = newOptions.filter((item) => {
-                if (item.value.toLowerCase().includes(keyword)) return true;
-                else return false;
-            })
-            setOptions(newOptions)
-        } catch {
+    const onSearch = (keyword: string) => {
+        if (!tags) return;
+        const newOptions = tags
+            .filter(item => item.toLowerCase().includes(keyword.toLowerCase()))
+            .map(item => ({ value: item, label: item }));
+        setOptions(newOptions);
+    };
 
-        }
-    }
-    // const debounceTag = useDebounce(onSearch, 500);
-    return <>
-        <div className={styles.wrapper}>
-            <Form
-                form={form}
-                name="log"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 24 }}
-                style={{ width: '70%' }}
-                initialValues={{ remember: true }}
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout='vertical'
-            >
-                <div className={styles.inputWrapper}>
-                    <Form.Item<FieldType>
-                        label="章节:"
-                        name="tag"
-                        rules={[{ required: true, message: '请输入Tag' }]}
-                    // initialValue={title} 只有第一次才能设置初始值，即组件挂载时
+    return (
+        <>
+            <div className={styles.wrapper}>
+                {/* 使用 Card 包裹，提升质感 */}
+                <Card
+                    className={styles.uploadCard}
+                    bordered={false}
+                    title={id ? "编辑文章" : "撰写新文章"}
+                >
+                    <Form
+                        form={form}
+                        name="upload-form"
+                        layout='vertical'
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                        autoComplete="off"
+                        initialValues={{ remember: true }}
                     >
-                        {/* <Input /> */}
-                        <AutoComplete
-                            options={options}
-                            // onSelect={}//选中时
-                            onSearch={onSearch}
-                            showSearch={true}
-                            placeholder="请输入章节"
-                        />
-                    </Form.Item>
-                    <Form.Item<FieldType>
-                        label="标题:"
-                        name="title"
-                        rules={[{ required: true, }]}
-                    >
-                        <Input placeholder='请输入标题' />
-                    </Form.Item>
+                        {/* 使用 Row Col 布局，让输入框在一行显示 */}
+                        <Row gutter={24}>
+                            <Col xs={24} md={8}>
+                                <Form.Item<FieldType>
+                                    label="章节 / 标签"
+                                    name="tag"
+                                    rules={[{ required: true, message: '请输入或选择章节' }]}
+                                >
+                                    <AutoComplete
+                                        options={options}
+                                        onSearch={onSearch}
+                                        placeholder="输入或选择章节"
+                                        allowClear
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={16}>
+                                <Form.Item<FieldType>
+                                    label="文章标题"
+                                    name="title"
+                                    rules={[{ required: true, message: '请输入标题' }]}
+                                >
+                                    <Input placeholder='请输入文章标题' />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                </div>
-                <Form.Item>
-                    <div className={styles.editorWrapper}>
-                        <Editor
-                            tinymceScriptSrc='/tinymce/tinymce.min.js'
-                            licenseKey='gpl'
-                            onInit={(_evt, editor) => editorRef.current = editor}
-                            initialValue={content}
-                            init={{
-                                skin: skin,       // 界面变黑
-                                content_css: contentCss,    // 内容区域也变黑
-                                height: '600px',
-                                menubar: false,
-                                plugins: [
-                                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                    'insertdatetime', 'media', 'table', 'preview', 'help', 'wordcount'
-                                ],
-                                toolbar: 'undo redo | blocks | ' +
-                                    'bold italic forecolor | alignleft aligncenter ' +
-                                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                                    'image | removeformat | help', // 已添加 image 按钮
-                                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                        <Form.Item>
+                            <div className={styles.editorWrapper}>
+                                <Editor
+                                    tinymceScriptSrc='/tinymce/tinymce.min.js'
+                                    licenseKey='gpl'
+                                    onInit={(_evt, editor) => editorRef.current = editor}
+                                    initialValue={content}
+                                    init={{
+                                        skin: skin,
+                                        content_css: contentCss,
+                                        height: 600, // 这里用数字即可
+                                        menubar: true, // 建议开启菜单栏，方便找功能
+                                        plugins: [
+                                            // 1. 在这里加入 codesample
+                                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                                            'insertdatetime', 'media', 'table', 'preview', 'help', 'wordcount',
+                                            'codesample'
+                                        ],
+                                        toolbar:
+                                            'undo redo | blocks | ' +
+                                            'bold italic forecolor | alignleft aligncenter ' +
+                                            'alignright alignjustify | bullist numlist outdent indent | ' +
+                                            // 2. 在工具栏加入 codesample 按钮
+                                            'image codesample | removeformat | help',
+                                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }', // 字体调大一点点更舒服
 
-                                // 图片上传配置
-                                images_upload_handler: handleImageUpload,
-                                automatic_uploads: true,
-                                paste_data_images: true // 允许粘贴图片
-                            }}
-                        />
-                    </div>
-                </Form.Item>
-                <Form.Item>
-                    <div className={styles.btnWrapper}>
-                        <Button type="primary" htmlType="submit" loading={uploading}>
-                            提交
-                        </Button>
-                    </div>
-                </Form.Item>
-            </Form >
-        </div >
+                                        // 图片上传配置
+                                        images_upload_handler: handleImageUpload,
+                                        automatic_uploads: true,
+                                        paste_data_images: true,
 
-        <Modal
-            title="提示"
-            closable={{ 'aria-label': 'Custom Close Button' }}
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={handleCancel}
-            footer={(_, { OkBtn, CancelBtn }) => (
-                <>
-                    <OkBtn />
-                    <CancelBtn />
-                </>
-            )}
-        >
-            <div>
-                还没有保存文档，确定返回吗？
+                                        // 代码块配置 (可选: 定义默认代码语言)
+                                        codesample_languages: [
+                                            { text: 'HTML/XML', value: 'markup' },
+                                            { text: 'JavaScript', value: 'javascript' },
+                                            { text: 'CSS', value: 'css' },
+                                            { text: 'TypeScript', value: 'typescript' },
+                                            { text: 'Java', value: 'java' },
+                                            { text: 'C++', value: 'cpp' },
+                                            { text: 'Python', value: 'python' },
+                                            { text: 'C', value: 'c' },
+                                            { text: 'C#', value: 'csharp' },
+                                        ]
+                                    }}
+                                />
+                            </div>
+                        </Form.Item>
+
+                        <Form.Item>
+                            <div className={styles.btnWrapper}>
+                                <Space size="large">
+                                    <Button onClick={() => nav(-1)}>取消</Button>
+                                    <Button type="primary" htmlType="submit" loading={uploading} size='large'>
+                                        {id ? "保存修改" : "发布"}
+                                    </Button>
+                                </Space>
+                            </div>
+                        </Form.Item>
+                    </Form>
+                </Card>
             </div>
-        </Modal>
 
-
-
-    </>
+            <Modal
+                title="未保存提示"
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                okText="离开"
+                cancelText="继续编辑"
+                centered // 垂直居中显示
+            >
+                <p>您有内容尚未保存，确定要离开当前页面吗？离开后内容将丢失。</p>
+            </Modal>
+        </>
+    );
 }

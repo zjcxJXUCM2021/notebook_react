@@ -93,7 +93,13 @@ export default function AiSiderMenu(prop: AiSiderMenuProp) {
                     { key: '1', label: '新对话' },
                 ],
             },
-            ...groupResult
+            {
+                key: 'history-submenu', // 唯一的 key
+                label: '历史对话',      // 你的标题
+
+                children: groupResult   // 2. 将之前的日期分组全部放入这个 children 中
+            }
+            // ...groupResult
         ];
 
         // 3. 依赖数组：任何一个变了，菜单都会重新计算
