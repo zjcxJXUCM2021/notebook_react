@@ -119,7 +119,8 @@ export default function Upload() {
         return new Promise<string>((resolve, reject) => {
             const formData = new FormData();
             formData.append('file', blobInfo.blob(), blobInfo.filename());
-            axios.post('https://jlyproject.cn/api/upload/photo/', formData, {
+            // 使用配置好的代理路径 /api
+            axios.post('/api/upload/photo/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: (e) => {
                     if (e.total) {

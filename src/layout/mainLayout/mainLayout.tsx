@@ -23,8 +23,8 @@ export default function MainLayout() {
     useEffect(() => {
         const init = async () => {
             const unorderList = await getAllText();
-            const orderList = unorderList.sort((a: Text, b: Text) => b.id - a.id);
-            setTexts(orderList);
+            // const orderList = unorderList.sort((a: Text, b: Text) => b.id - a.id);这里会覆盖原数据，不要直接进行排序
+            setTexts(unorderList);
         }
         init();
     }, []);

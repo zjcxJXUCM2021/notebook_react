@@ -8,10 +8,6 @@ interface Text {
 
 }
 
-interface keyArr {
-    [key: string]: Text[]
-}
-
 interface chatData {
     role: 'system' | 'user' | 'assistant',
     content: string,
@@ -23,6 +19,7 @@ interface session {
     title: string,
     updatedAt: string,
 }
+
 
 declare module 'react-syntax-highlighter';
 

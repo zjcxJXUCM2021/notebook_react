@@ -1,7 +1,7 @@
 import { RouterProvider } from 'react-router'
 import './App.less'
 import router from './router/router'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import useDarkStore from './store/darkMode'
 import useUserStore from './store/user'
 import { ConfigProvider } from 'antd'
@@ -9,8 +9,8 @@ import getThemeConfig from './css/themeConfig/themeConfig'
 import { GlobalStyle } from './components/cssinJS/GlobalStyle'
 import { getInfo } from './api/http/api'
 import 'nprogress/nprogress.css'; // 必须引入这一行
-import AiChat from './components/AIChat/AiChat'
 function App() {
+  const AiChat = lazy(() => import('./components/AIChat/AiChat'));
   const DarkMode = useDarkStore();
   const UserStore = useUserStore();
   let { isDark } = DarkMode;
@@ -43,7 +43,11 @@ function App() {
 
       <ConfigProvider theme={themeConfig}>
         <GlobalStyle></GlobalStyle>
-        {UserStore.role && <AiChat></AiChat>}
+        {UserStore.role &&
+          <Suspense fallback={<div>加载中</div>}>
+            <AiChat></AiChat>
+          </Suspense>
+        }
         <RouterProvider router={router} />
       </ConfigProvider>
 

@@ -1,22 +1,32 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
-import qiniu from 'vite-plugin-qiniu'; // 引入插件
+import uploadBundleQiniu from './plugins/uploadBundleQiniu';
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
 
   return {
-    envDir: './src/env',
-    base: isProduction ? 'https://redsources.jlyproject.cn/vite/' : '/',
+    envDir: './env',
+    base: isProduction ? 'https://redsources.jlyproject.cn/vite/' : '/', //CDN
     plugins: [
       react(),
-      qiniu({
+      uploadBundleQiniu({
         accessKey: 'EIriimCUVKCk0G4gCFACezpYSZFvpZ6L8IvQqYUR',
         secretKey: 'oN_nA1SkDFDOpjxf3c4gfw_LGwtEGBb9TV-yzsDE',
         bucket: 'jlyred',
-        rootName: "vite",
+        remotePath: `vite/`,
+        cacheControl: {
+          html: 0,
+          assets: 31536000
+        }
       })
+      // qiniu({
+      //   accessKey: 'EIriimCUVKCk0G4gCFACezpYSZFvpZ6L8IvQqYUR',
+      //   secretKey: 'oN_nA1SkDFDOpjxf3c4gfw_LGwtEGBb9TV-yzsDE',
+      //   bucket: 'jlyred',
+      //   rootName: "vite",
+      // })
     ],
     resolve: {
       alias: {
@@ -31,7 +41,7 @@ export default defineConfig(({ mode }) => {
               if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
                 return 'lib-react';
               }
-              if (id.includes('antd')) return 'lib-antd';
+              if (id.includes('antd') || id.includes('@ant-design/icons')) return 'lib-antd';
               else return 'vendor';
             }
           }
