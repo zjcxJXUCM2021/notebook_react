@@ -1,11 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import uploadBundleQiniu from './plugins/uploadBundleQiniu';
+// import qiniu from 'vite-plugin-qiniu'; // 引入插件
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
-
+  console.log(isProduction)
   return {
     envDir: './env',
     base: isProduction ? 'https://redsources.jlyproject.cn/vite/' : '/', //CDN
@@ -15,7 +20,7 @@ export default defineConfig(({ mode }) => {
         accessKey: 'EIriimCUVKCk0G4gCFACezpYSZFvpZ6L8IvQqYUR',
         secretKey: 'oN_nA1SkDFDOpjxf3c4gfw_LGwtEGBb9TV-yzsDE',
         bucket: 'jlyred',
-        remotePath: `vite/`,
+        remotePath: `vite`,
         cacheControl: {
           html: 0,
           assets: 31536000
@@ -39,9 +44,9 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('node_modules')) {
               if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-                return 'lib-react';
+                return 'react-vendor';
               }
-              if (id.includes('antd') || id.includes('@ant-design/icons')) return 'lib-antd';
+              if (id.includes('antd') || id.includes('@ant-design/icons')) return 'antd-vendor';
               else return 'vendor';
             }
           }

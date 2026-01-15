@@ -7,9 +7,9 @@ import useTextFontSize from '../../store/state/textFontSize';
 import useUserStore from '../../store/user';
 
 // 注意：这里移除了静态 import
-// import parse, { domToReact } from 'html-react-parser';
-// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import parse, { domToReact } from 'html-react-parser';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface Text {
     tag: string;
@@ -63,15 +63,15 @@ export default function TextShow() {
             try {
                 // 并行加载所有需要的库
                 // 这样只有进入这个页面且获取到数据后，才会下载这些大文件
-                const [
-                    { default: parse, domToReact },
-                    { Prism: SyntaxHighlighter }, // 处理具名导出
-                    { vscDarkPlus }
-                ] = await Promise.all([
-                    import('html-react-parser'),
-                    import('react-syntax-highlighter'),
-                    import('react-syntax-highlighter/dist/esm/styles/prism')
-                ]);
+                // const [
+                //     { default: parse, domToReact },
+                //     { Prism: SyntaxHighlighter }, // 处理具名导出
+                //     { vscDarkPlus }
+                // ] = await Promise.all([
+                //     import('html-react-parser'),
+                //     import('react-syntax-highlighter'),
+                //     import('react-syntax-highlighter/dist/esm/styles/prism')
+                // ]);
 
                 // --- 辅助函数：提取纯文本 (移到了内部) ---
                 const getTextFromDom = (domNode: any): string => {
