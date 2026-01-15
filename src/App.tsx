@@ -40,11 +40,10 @@ function App() {
 
   return (
     <>
-
       <ConfigProvider theme={themeConfig}>
         <GlobalStyle></GlobalStyle>
         {UserStore.role &&
-          <Suspense fallback={<div>加载中</div>}>
+          <Suspense fallback={<div></div>}>
             <AiChat></AiChat>
           </Suspense>
         }

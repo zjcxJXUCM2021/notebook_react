@@ -2,6 +2,7 @@ import qiniu from 'qiniu';
 import path from 'path';
 import type { Plugin } from 'vite';
 import type { OutputBundle } from 'rollup';
+import mime from 'mime-types'; // 🎯 [修复] 引入 mime 库
 export interface QiniuOptions {
     accessKey: string;
     secretKey: string;
@@ -33,10 +34,12 @@ export default function uploadBundleQiniu(options: QiniuOptions): Plugin {
 
     const formUploader = new qiniu.form_up.FormUploader(config);
     const bucketManager = new qiniu.rs.BucketManager(mac, config);
-    const putExtra = new qiniu.form_up.PutExtra();
 
-    // 辅助函数：计算缓存头
+    // ❌ [移除] 不要在这里定义 putExtra，因为它是单例，无法针对不同文件设置不同 MIME
+    // const putExtra = new qiniu.form_up.PutExtra();
+
     const getCacheControlHeader = (fileName: string): string | null => {
+        // ... (保持不变) ...
         if (!options.cacheControl) return null;
         let maxAge = 0;
         if (typeof options.cacheControl === 'number') {
@@ -52,33 +55,35 @@ export default function uploadBundleQiniu(options: QiniuOptions): Plugin {
         name: "uploadBundleQiniu",
         writeBundle: async (_outputOptions, bundle: OutputBundle) => {
             const uploadPromises: Promise<void>[] = [];
-
-            // 获取配置的根目录，默认为空字符串
-            // 🎯 关键点 1
             const remotePrefix = options.remotePath || '';
 
             console.log(`\n🚀 [Qiniu] 开始上传到: ${options.bucket}/${remotePrefix}`);
 
             for (const [fileName, file] of Object.entries(bundle)) {
-                // 🎯 关键点 2: 路径拼接
-                // 使用 path.posix.join 确保在 Windows 下也生成 "dir/file.js" 而不是 "dir\file.js"
-                // 它会自动处理多余的斜杠，比如 'v1//' + '/assets' -> 'v1/assets'
                 const key = path.posix.join(remotePrefix, fileName);
-
                 const content = file.type === 'asset' ? file.source : file.code;
 
-                // scope: 允许覆盖同名文件
+                // 🎯 [修复] 1. 获取准确的 MIME Type
+                // 如果 lookup 失败，回退到 octet-stream，但通常 js/css 都能识别准确
+                const mimeType = mime.lookup(fileName) || 'application/octet-stream';
+
+                // 🎯 [修复] 2. 为每个文件创建独立的 PutExtra 对象
+                const putExtra = new qiniu.form_up.PutExtra();
+                // 🎯 [修复] 3. 显式设置 mimeType
+                // 这样七牛云就会直接使用这个类型，而不会去触发 detectMime 进行猜测
+                putExtra.mimeType = mimeType;
+
                 const putPolicy = new qiniu.rs.PutPolicy({
                     scope: `${options.bucket}:${key}`
                 });
                 const uploadToken = putPolicy.uploadToken(mac);
 
                 const task = new Promise<void>((resolve, reject) => {
+                    // 传入我们配置好的 putExtra
                     formUploader.put(uploadToken, key, content, putExtra, async (respErr, _respBody, respInfo) => {
                         if (respErr) return reject(respErr);
                         if (respInfo.statusCode !== 200) return reject(new Error(`Status: ${respInfo.statusCode}`));
 
-                        // 修改 Header 逻辑（保持不变）
                         const cacheHeader = getCacheControlHeader(fileName);
                         if (cacheHeader) {
                             try {
@@ -86,7 +91,8 @@ export default function uploadBundleQiniu(options: QiniuOptions): Plugin {
                             } catch (e) { /* ignore */ }
                         }
 
-                        console.log(`✅ ${fileName} -> ${key}`);
+                        // 打印时可以顺便确认一下类型
+                        console.log(`✅ [${mimeType}] ${fileName} -> ${key}`);
                         resolve();
                     });
                 });

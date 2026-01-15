@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import uploadBundleQiniu from './plugins/uploadBundleQiniu';
-// import qiniu from 'vite-plugin-qiniu'; // 引入插件
+//import qiniu from 'vite-plugin-qiniu'; // 引入插件
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -44,10 +44,10 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('node_modules')) {
               if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-                return 'react-vendor';
+                return 'reactVendor';
               }
-              if (id.includes('antd') || id.includes('@ant-design/icons')) return 'antd-vendor';
-              else return 'vendor';
+              if (id.includes('antd') || id.includes('@ant-design/icons')) return 'antdVendor';
+              else return 'mainVendor';
             }
           }
         }

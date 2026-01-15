@@ -76,7 +76,7 @@ export default function Left(prop: leftProp) {
         setOpen(false);
     };
     return <>
-        <div className={styles.wrapper}>
+        <nav className={styles.wrapper}>
             <div className={styles.upWrapper}>
                 {UserStore.isLoading ? <Skeleton.Avatar size={200}
                     shape="circle" >
@@ -155,7 +155,7 @@ export default function Left(prop: leftProp) {
                 </Skeleton>
             </div>
 
-        </div >
+        </nav >
 
         <Modal
             open={open}
